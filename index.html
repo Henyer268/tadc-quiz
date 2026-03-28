@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TADC Quiz — ¿Cuánto sabes del Circo Digital?</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a1a;
+    --card: #12122a;
+    --card2: #1a1a35;
+    --purple: #7c3aed;
+    --purple2: #a855f7;
+    --pink: #ec4899;
+    --cyan: #06b6d4;
+    --yellow: #fbbf24;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #f1f0ff;
+    --muted: #8b8aaa;
+    --border: rgba(124,58,237,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite var(--delay);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; width: 100%; animation: fadeIn 0.4s ease; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== WELCOME SCREEN ===== */
+  .logo-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    letter-spacing: 3px;
+    text-align: center;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--purple2), var(--pink), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(168,85,247,0.5));
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(168,85,247,0.4)); }
+    50% { filter: drop-shadow(0 0 40px rgba(236,72,153,0.6)); }
+  }
+
+  .logo-sub {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    letter-spacing: 6px;
+    color: var(--cyan);
+    text-align: center;
+    margin-top: 8px;
+    opacity: 0.8;
+  }
+
+  .circus-emoji {
+    font-size: 4rem;
+    text-align: center;
+    margin: 20px 0;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  .welcome-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .welcome-card p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .categories-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .cat-badge {
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .cat-badge.false { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+  .cat-badge.avg { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; }
+  .cat-badge.good { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+  .cat-badge.super { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #d8b4fe; }
+
+  .input-group {
+    margin: 20px 0;
+    text-align: left;
+  }
+
+  .input-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--purple2);
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .input-group input {
+    width: 100%;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .input-group input:focus {
+    border-color: var(--purple2);
+    box-shadow: 0 0 0 4px rgba(168,85,247,0.1);
+  }
+
+  .input-group input::placeholder { color: var(--muted); font-weight: 400; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: white;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(124,58,237,0.6);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--card2);
+    border: 2px solid var(--border);
+    color: var(--purple2);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--purple2);
+    background: rgba(168,85,247,0.1);
+  }
+
+  /* ===== QUIZ SCREEN ===== */
+  .quiz-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 15px;
+  }
+
+  .q-counter {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    color: var(--purple2);
+    white-space: nowrap;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--card2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  .timer-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transition: border-color 0.3s;
+  }
+
+  .timer-box.warning { border-color: var(--yellow); color: var(--yellow); }
+  .timer-box.danger { border-color: var(--red); color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  .score-live {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    color: var(--green);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .question-level {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .question-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .type-mc { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+  .type-tf { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .type-open { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+
+  .question-text {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-weight: 800;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  /* Multiple choice */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+
+  @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--purple2);
+    background: rgba(168,85,247,0.1);
+    transform: translateY(-2px);
+  }
+
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+  }
+
+  .option-btn.reveal {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.1);
+    opacity: 0.6;
+  }
+
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(168,85,247,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bangers', cursive;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: var(--purple2);
+  }
+
+  /* True/False */
+  .tf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .tf-btn {
+    padding: 24px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    font-family: 'Bangers', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tf-btn.verdadero:hover:not(:disabled) { border-color: var(--green); background: rgba(16,185,129,0.1); }
+  .tf-btn.falso:hover:not(:disabled) { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .tf-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  .tf-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.2); color: #fca5a5; }
+  .tf-btn.reveal { border-color: var(--green); background: rgba(16,185,129,0.1); opacity: 0.6; }
+
+  /* Open answer */
+  .open-answer-area {
+    width: 100%;
+  }
+
+  .open-answer-area textarea {
+    width: 100%;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    outline: none;
+    resize: none;
+    height: 100px;
+    transition: border-color 0.3s;
+    margin-bottom: 12px;
+  }
+
+  .open-answer-area textarea:focus {
+    border-color: var(--purple2);
+    box-shadow: 0 0 0 4px rgba(168,85,247,0.1);
+  }
+
+  .open-answer-area textarea::placeholder { color: var(--muted); font-weight: 400; }
+
+  .answer-feedback {
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 10px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .answer-feedback.correct { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+  .answer-feedback.wrong { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+  .answer-feedback.partial { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; }
+
+  .next-btn-area {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  /* ===== RESULT SCREEN ===== */
+  .result-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+  }
+
+  .result-emoji { font-size: 5rem; animation: bounce 2s ease-in-out infinite; margin-bottom: 16px; }
+
+  .result-category {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .result-score {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .result-score span { color: var(--text); font-weight: 800; font-size: 1.3rem; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-box {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Bangers', cursive;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    color: var(--purple2);
+  }
+
+  .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+  .result-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--card2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0 24px;
+  }
+
+  .result-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+  }
+
+  .btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+  /* ===== RANKING SCREEN ===== */
+  .ranking-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: 3px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--yellow), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .ranking-sub { color: var(--muted); text-align: center; margin-bottom: 24px; font-size: 0.9rem; }
+
+  .ranking-table {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .ranking-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px 80px 100px;
+    padding: 14px 20px;
+    background: var(--card2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .ranking-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px 80px 100px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(124,58,237,0.1);
+    align-items: center;
+    transition: background 0.2s;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row:hover { background: rgba(168,85,247,0.05); }
+
+  .ranking-row.highlight {
+    background: rgba(168,85,247,0.1);
+    border-left: 3px solid var(--purple2);
+  }
+
+  .rank-pos {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+  }
+
+  .rank-pos.gold { color: #fbbf24; }
+  .rank-pos.silver { color: #d1d5db; }
+  .rank-pos.bronze { color: #f97316; }
+  .rank-pos.normal { color: var(--muted); }
+
+  .rank-name { font-weight: 800; font-size: 0.95rem; }
+  .rank-score { font-family: 'Bangers', cursive; font-size: 1.2rem; color: var(--purple2); letter-spacing: 1px; text-align: center; }
+  .rank-time { font-size: 0.85rem; color: var(--muted); text-align: center; }
+  .rank-cat { font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 8px; text-align: center; }
+
+  .rank-cat.superFan { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+  .rank-cat.sobresaliente { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  .rank-cat.promedio { background: rgba(251,191,36,0.2); color: #fde68a; }
+  .rank-cat.falso { background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+  .loading-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--purple2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 40px; color: var(--muted); }
+  .empty-state p { font-size: 1rem; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .ranking-header, .ranking-row {
+      grid-template-columns: 40px 1fr 60px 70px;
+    }
+    .ranking-header > *:nth-child(5),
+    .ranking-row > *:nth-child(5) { display: none; }
+    .ranking-header > *:nth-child(4),
+    .ranking-row > *:nth-child(4) { font-size: 0.75rem; }
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confettiFall var(--d) ease-in var(--delay) forwards;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  .error-msg {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 10px 0;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+
+  <!-- ===== WELCOME SCREEN ===== -->
+  <div class="screen active" id="screen-welcome">
+    <div class="logo-title">THE AMAZING<br>DIGITAL CIRCUS</div>
+    <div class="logo-sub">¿CUÁNTO SABES?</div>
+    <div class="circus-emoji">🎪</div>
+
+    <div class="welcome-card">
+      <p>40 preguntas para descubrir qué tan fan eres del Circo Digital. Responde rápido — ¡el tiempo también cuenta!</p>
+
+      <div class="categories-preview">
+        <div class="cat-badge false">0–10 · Fan Falso 😬</div>
+        <div class="cat-badge avg">11–25 · Fan Promedio 🙂</div>
+        <div class="cat-badge good">26–35 · Sobresaliente 🌟</div>
+        <div class="cat-badge super">36–40 · Super Fan 🎪</div>
+      </div>
+
+      <div class="input-group">
+        <label>Tu nombre o apodo</label>
+        <input type="text" id="player-name" placeholder="Ej: Pomni_Fan123" maxlength="30" autocomplete="off">
+      </div>
+
+      <div class="error-msg" id="name-error">¡Necesitas ingresar tu nombre para continuar!</div>
+
+      <button class="btn btn-primary" onclick="startGame()">
+        🎪 ¡ENTRAR AL CIRCO!
+      </button>
+      <br><br>
+      <button class="btn btn-secondary" onclick="showScreen('screen-ranking'); loadRanking()">
+        🏆 Ver Ranking TOP 40
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== QUIZ SCREEN ===== -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <div class="q-counter" id="q-counter">1 / 40</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="timer-box" id="timer-box">⏱ <span id="timer-display">00:00</span></div>
+      <div class="score-live" id="score-live">✓ 0</div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-level" id="q-level"></div>
+      <div class="question-type-badge" id="q-type-badge"></div>
+      <div class="question-text" id="q-text"></div>
+    </div>
+
+    <div id="answer-area" style="width:100%"></div>
+  </div>
+
+  <!-- ===== RESULT SCREEN ===== -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-emoji" id="result-emoji">🎪</div>
+      <div class="result-category" id="result-category"></div>
+      <div class="result-score" id="result-score"></div>
+
+      <div class="result-bar">
+        <div class="result-bar-fill" id="result-bar-fill" style="width:0%"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-score">0</div>
+          <div class="stat-label">Puntos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-correct">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-time">0:00</div>
+          <div class="stat-label">Tiempo</div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="save-error"></div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="showScreen('screen-ranking'); loadRanking()">
+          🏆 Ver mi posición en el Ranking
+        </button>
+        <button class="btn btn-secondary" onclick="restartGame()">
+          🔄 Jugar de nuevo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RANKING SCREEN ===== -->
+  <div class="screen" id="screen-ranking">
+    <div class="ranking-title">🏆 TOP 40</div>
+    <div class="ranking-sub">Los mayores fans del Circo Digital</div>
+
+    <div class="ranking-table">
+      <div class="ranking-header">
+        <div>#</div>
+        <div>Jugador</div>
+        <div style="text-align:center">Pts</div>
+        <div style="text-align:center">Tiempo</div>
+        <div style="text-align:center">Categoría</div>
+      </div>
+      <div id="ranking-body">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando el ranking...</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" style="max-width:300px" onclick="showScreen('screen-welcome')">
+      ← Volver al inicio
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ===== CONFIG SUPABASE =====
+const SUPABASE_URL = 'https://goopxqkxuogqhlppsfyv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_P1uFKhOCi6Yr9ie0mokF9A_uxTJk2Bf';
+
+// ===== PREGUNTAS =====
+const questions = [
+  // NIVEL 1 - Básico
+  { q: "¿Cómo se llama la protagonista principal?", type: "mc", options: ["Ragatha","Pomni","Bubble","Kinger"], answer: 1, level: "Nivel 1 — Básico" },
+  { q: "¿Qué tipo de gorro usa Pomni?", type: "mc", options: ["Sombrero de mago","Corona","Gorro de bufón","Gorra de béisbol"], answer: 2, level: "Nivel 1 — Básico" },
+  { q: "¿Quién es el maestro de ceremonia del circo digital?", type: "mc", options: ["Jax","Kinger","Caine","Gangle"], answer: 2, level: "Nivel 1 — Básico" },
+  { q: "¿De qué color es el traje de Jax?", type: "mc", options: ["Rojo","Azul","Verde","Morado"], answer: 3, level: "Nivel 1 — Básico" },
+  { q: "¿Qué tipo de personaje es Ragatha?", type: "mc", options: ["Robot","Muñeca de trapo","Payaso","Marioneta"], answer: 1, level: "Nivel 1 — Básico" },
+  { q: "¿El mundo del circo es real o virtual?", type: "tf", options: ["Real","Virtual"], answer: 1, level: "Nivel 1 — Básico" },
+  { q: "¿Qué personaje tiene una actitud traviesa y dientes grandes?", type: "mc", options: ["Caine","Ragatha","Jax","Kinger"], answer: 2, level: "Nivel 1 — Básico" },
+  { q: "¿Pomni llega al circo por accidente o por decisión propia?", type: "tf", options: ["Por decisión propia","Por accidente"], answer: 1, level: "Nivel 1 — Básico" },
+  { q: "¿Qué emoción muestra Pomni al inicio de la serie?", type: "mc", options: ["Alegría","Ira","Miedo y ansiedad","Aburrimiento"], answer: 2, level: "Nivel 1 — Básico" },
+  { q: "¿El circo digital es ordenado o caótico?", type: "tf", options: ["Ordenado","Caótico"], answer: 1, level: "Nivel 1 — Básico" },
+
+  // NIVEL 2 - Intermedio
+  { q: "¿Cómo describirías la personalidad de Caine?", type: "mc", options: ["Seria y formal","Excéntrica y caótica","Tímida y tranquila","Malvada y cruel"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué es lo que más teme Pomni dentro del circo?", type: "mc", options: ["Los monstruos","Las aventuras","Quedarse atrapada para siempre","La oscuridad"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué estilo visual tiene el mundo digital?", type: "mc", options: ["Realista y oscuro","Colorido y absurdo","Minimalista y blanco","Medieval y misterioso"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Cómo reaccionan los demás personajes ante la llegada de Pomni?", type: "mc", options: ["Con hostilidad","Con indiferencia","Con curiosidad","Con miedo"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué actitud caracteriza principalmente a Jax?", type: "mc", options: ["Amable y empático","Miedoso y ansioso","Sarcástica y burlona","Líder y protector"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿La serie mezcla comedia con qué otro género?", type: "mc", options: ["Romance","Terror psicológico","Ciencia ficción","Aventura épica"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Cómo se llama el proceso cuando un personaje pierde la cordura en el circo?", type: "mc", options: ["Digitalización","Fragmentación","Abstracción","Corrupción"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué tipo de humor usa principalmente la serie?", type: "mc", options: ["Humor negro","Humor absurdo","Humor romántico","Slapstick puro"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Quién acompaña a Caine como ayudante en el circo?", type: "mc", options: ["Jax","Ragatha","Bubble","Kinger"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿Los personajes del circo hablan de manera normal?", type: "tf", options: ["Sí, normalmente","No, con efectos extraños"], answer: 0, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué hace que el circo sea perturbador a pesar de su apariencia alegre?", type: "mc", options: ["La música oscura","Lo feliz pero perturbador al mismo tiempo","Los villanos evidentes","El diseño tenebroso"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Los personajes recuerdan bien su pasado antes de llegar al circo?", type: "tf", options: ["Sí, perfectamente","No, tienen recuerdos borrosos"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿La serie está hecha en 2D o en 3D?", type: "tf", options: ["2D","3D"], answer: 1, level: "Nivel 2 — Intermedio" },
+  { q: "¿Qué emoción NO falta en el primer episodio de la serie?", type: "mc", options: ["Nostalgia","Euforia","Ansiedad","Romanticismo"], answer: 2, level: "Nivel 2 — Intermedio" },
+  { q: "¿Las reglas del mundo digital son estables o cambian constantemente?", type: "tf", options: ["Son estables","Cambian constantemente"], answer: 1, level: "Nivel 2 — Intermedio" },
+
+  // NIVEL 3 - Avanzado
+  { q: "¿Qué hace Caine constantemente para mantener a los personajes ocupados?", type: "mc", options: ["Les da trabajos reales","Crear aventuras y actividades forzadas","Les enseña sobre el circo","Los deja libres"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué le puede pasar a un personaje que no participa correctamente en las actividades del circo?", type: "mc", options: ["Es expulsado del circo","Pierde sus colores","Puede perder su estabilidad mental","Se convierte en NPC"], answer: 2, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué característica tiene el entorno cuando algo no está bien en el sistema del circo?", type: "mc", options: ["Todo se vuelve blanco","Se vuelve extraño, incompleto o glitchy","Los personajes desaparecen","La música se detiene"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Cómo es el comportamiento de Jax frente a situaciones de peligro?", type: "mc", options: ["Entra en pánico","Busca ayuda inmediatamente","Relajado y burlón","Se vuelve heroico"], answer: 2, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué elemento del mundo digital muestra que no sigue reglas físicas normales?", type: "mc", options: ["Los personajes no comen","Cambios ilógicos de espacio y entorno","Los colores son monocromáticos","No hay gravedad"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué sucede cuando Pomni insiste demasiado en intentar escapar del circo?", type: "mc", options: ["Encuentra una salida","Caine la castiga","Se altera emocionalmente","Los demás la ignoran"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué indica que los personajes llevan mucho tiempo atrapados en el circo?", type: "mc", options: ["Sus trajes están desgastados","Su actitud resignada ante la situación","Hablan de años pasados","Sus recuerdos son perfectos"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Cómo trata Caine los problemas emocionales de los personajes?", type: "mc", options: ["Los ayuda genuinamente","Los ignora o los cubre con entretenimiento","Los envía a terapia","Les da respuestas honestas"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué tipo de lugares aparecen cuando los personajes exploran fuera del escenario principal?", type: "mc", options: ["Mundos paralelos completos","Espacios vacíos o sin terminar","Zonas llenas de enemigos","Recuerdos del pasado real"], answer: 1, level: "Nivel 3 — Avanzado" },
+  { q: "¿Qué efecto tiene el entorno del circo en la mente de Pomni?", type: "mc", options: ["La hace más fuerte","La relaja y distrae","La desestabiliza y estresa más","No le afecta"], answer: 1, level: "Nivel 3 — Avanzado" },
+
+  // NIVEL 4 - Experto
+  { q: "¿Qué intenta hacer Pomni desesperadamente cuando llega al mundo digital?", type: "mc", options: ["Hacer amigos rápidamente","Unirse a una aventura","Buscar una salida o puerta de escape","Aprender las reglas del circo"], answer: 2, level: "Nivel 4 — Experto" },
+  { q: "¿Qué le dice Caine a Pomni cuando ella pregunta por cómo salir del circo?", type: "mc", options: ["Le explica el proceso de salida","Que no hay salida o evita dar una respuesta clara","Le promete que la ayudará","Le dice que pregunte a Ragatha"], answer: 1, level: "Nivel 4 — Experto" },
+  { q: "¿Qué encuentra Pomni cuando explora lugares fuera del recorrido normal del circo?", type: "mc", options: ["Personajes secretos","Zonas vacías, extrañas o espacios incompletos","La salida real del circo","Recuerdos de otros personajes"], answer: 1, level: "Nivel 4 — Experto" },
+  { q: "¿Qué reacción tienen los otros personajes cuando Pomni entra en pánico?", type: "mc", options: ["Se asustan también","La ignoran completamente","Intentan calmarla, ya acostumbrados a eso","Llaman a Caine de inmediato"], answer: 2, level: "Nivel 4 — Experto" },
+  { q: "¿Qué situación provoca el momento más tenso del episodio piloto?", type: "mc", options: ["Una aventura peligrosa de Caine","Un ataque de un personaje abstracto","La crisis emocional de Pomni al darse cuenta que no puede escapar","La desaparición de un personaje"], answer: 2, level: "Nivel 4 — Experto" },
+];
+
+// ===== ESTADO DEL JUEGO =====
+let currentQ = 0;
+let score = 0;
+let correctCount = 0;
+let playerName = '';
+let totalSeconds = 0;
+let timerInterval = null;
+let answered = false;
+let currentHighlightName = '';
+
+// ===== ESTRELLAS =====
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s`;
+    container.appendChild(s);
+  }
+}
+
+// ===== NAVEGACIÓN =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ===== INICIAR JUEGO =====
+function startGame() {
+  const nameInput = document.getElementById('player-name');
+  const err = document.getElementById('name-error');
+  playerName = nameInput.value.trim();
+
+  if (!playerName) {
+    err.style.display = 'block';
+    nameInput.focus();
+    return;
+  }
+  err.style.display = 'none';
+
+  currentQ = 0;
+  score = 0;
+  correctCount = 0;
+  totalSeconds = 0;
+  answered = false;
+
+  startTimer();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+// ===== TEMPORIZADOR =====
+function startTimer() {
+  clearInterval(timerInterval);
+  totalSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    totalSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() { clearInterval(timerInterval); }
+
+function updateTimerDisplay() {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  document.getElementById('timer-display').textContent =
+    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+  const box = document.getElementById('timer-box');
+  box.className = 'timer-box';
+  if (totalSeconds > 600) box.classList.add('danger');
+  else if (totalSeconds > 420) box.classList.add('warning');
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// ===== RENDERIZAR PREGUNTA =====
+function renderQuestion() {
+  if (currentQ >= questions.length) { endGame(); return; }
+
+  answered = false;
+  const q = questions[currentQ];
+
+  document.getElementById('q-counter').textContent = `${currentQ+1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${(currentQ/questions.length)*100}%`;
+  document.getElementById('score-live').textContent = `✓ ${correctCount}`;
+  document.getElementById('q-level').textContent = q.level;
+  document.getElementById('q-text').textContent = q.q;
+
+  const typeBadge = document.getElementById('q-type-badge');
+  if (q.type === 'mc') { typeBadge.textContent = '🔵 Opción múltiple'; typeBadge.className = 'question-type-badge type-mc'; }
+  else if (q.type === 'tf') { typeBadge.textContent = '🟡 Verdadero / Falso'; typeBadge.className = 'question-type-badge type-tf'; }
+  else { typeBadge.textContent = '🟢 Respuesta abierta'; typeBadge.className = 'question-type-badge type-open'; }
+
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+
+  if (q.type === 'mc') renderMC(q, area);
+  else if (q.type === 'tf') renderTF(q, area);
+  else renderOpen(q, area);
+}
+
+function renderMC(q, area) {
+  const letters = ['A','B','C','D'];
+  const grid = document.createElement('div');
+  grid.className = 'options-grid';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectMC(i, q, grid);
+    grid.appendChild(btn);
+  });
+  area.appendChild(grid);
+}
+
+function selectMC(idx, q, grid) {
+  if (answered) return;
+  answered = true;
+  const btns = grid.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const isCorrect = idx === q.answer;
+  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns[q.answer].classList.add('reveal');
+
+  if (isCorrect) { score++; correctCount++; }
+
+  setTimeout(() => nextQuestion(), 1200);
+}
+
+function renderTF(q, area) {
+  const grid = document.createElement('div');
+  grid.className = 'tf-grid';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = `tf-btn ${i === 0 ? 'verdadero' : 'falso'}`;
+    btn.textContent = opt;
+    btn.onclick = () => selectTF(i, q, grid);
+    grid.appendChild(btn);
+  });
+  area.appendChild(grid);
+}
+
+function selectTF(idx, q, grid) {
+  if (answered) return;
+  answered = true;
+  const btns = grid.querySelectorAll('.tf-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const isCorrect = idx === q.answer;
+  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns[q.answer].classList.add('reveal');
+
+  if (isCorrect) { score++; correctCount++; }
+
+  setTimeout(() => nextQuestion(), 1200);
+}
+
+function renderOpen(q, area) {
+  const wrap = document.createElement('div');
+  wrap.className = 'open-answer-area';
+  wrap.innerHTML = `
+    <textarea id="open-input" placeholder="Escribe tu respuesta aquí..."></textarea>
+    <div class="answer-feedback" id="open-feedback"></div>
+    <div class="next-btn-area">
+      <button class="btn btn-primary" id="submit-open" onclick="submitOpen()">✓ Confirmar respuesta</button>
+    </div>
+  `;
+  area.appendChild(wrap);
+
+  const ta = document.getElementById('open-input');
+  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitOpen(); } });
+}
+
+function submitOpen() {
+  if (answered) return;
+  const q = questions[currentQ];
+  const input = document.getElementById('open-input').value.trim().toLowerCase();
+  const fb = document.getElementById('open-feedback');
+  const btn = document.getElementById('submit-open');
+
+  if (!input) return;
+
+  answered = true;
+  btn.disabled = true;
+  document.getElementById('open-input').disabled = true;
+
+  const correct = checkOpenAnswer(input, q);
+
+  fb.style.display = 'block';
+  if (correct === 'correct') {
+    fb.className = 'answer-feedback correct';
+    fb.textContent = `✓ ¡Correcto! La respuesta es: ${q.options[q.answer]}`;
+    score++; correctCount++;
+  } else if (correct === 'partial') {
+    fb.className = 'answer-feedback partial';
+    fb.textContent = `⚡ ¡Muy cerca! La respuesta era: ${q.options[q.answer]}`;
+    score++; correctCount++;
+  } else {
+    fb.className = 'answer-feedback wrong';
+    fb.textContent = `✗ Incorrecto. La respuesta era: ${q.options[q.answer]}`;
+  }
+
+  setTimeout(() => nextQuestion(), 1800);
+}
+
+function checkOpenAnswer(input, q) {
+  const correct = q.options[q.answer].toLowerCase();
+  const exceptions = q.exceptions || [];
+
+  if (input === correct) return 'correct';
+  if (correct.includes(input) || input.includes(correct)) return 'correct';
+
+  // Excepciones por pregunta
+  const partialMatches = {
+    'miedo y ansiedad': ['miedo','ansiedad','angustia','panico','pánico','susto'],
+    'colorido y absurdo': ['colorido','absurdo','vistoso','brillante'],
+    'excéntrica y caótica': ['excentrica','excéntrica','caotica','caótica','loca','rara'],
+    'quedarse atrapada para siempre': ['atrapada','encerrada','no salir','sin salida'],
+    'terror psicológico': ['terror','psicologico','psicológico','horror','miedo'],
+    'humor absurdo': ['absurdo','absurda'],
+    'relajado y burlón': ['relajado','burlon','burlón','tranquilo'],
+    'actitud resignada ante la situación': ['resignada','resignacion','resignación','acostumbrados'],
+    'la desestabiliza y estresa más': ['desestabiliza','estresa','altera','perturba'],
+    'zonas vacías, extrañas o espacios incompletos': ['vacias','vacías','extrañas','incompletos','vacio','vacío'],
+    'buscar una salida o puerta de escape': ['salida','escapar','escape','puerta'],
+    'intentan calmarla, ya acostumbrados a eso': ['calmarla','calmar','tranquilizarla','acostumbrados'],
+    'la crisis emocional de pomni al darse cuenta que no puede escapar': ['crisis','emocional','pomni','escapar','no puede'],
+  };
+
+  for (const [key, synonyms] of Object.entries(partialMatches)) {
+    if (correct.includes(key) || key.includes(correct)) {
+      for (const syn of synonyms) {
+        if (input.includes(syn)) return 'partial';
+      }
+    }
+  }
+
+  for (const syn of synonyms_general(correct)) {
+    if (input.includes(syn) || syn.includes(input)) return 'partial';
+  }
+
+  return 'wrong';
+}
+
+function synonyms_general(correct) {
+  const maps = {
+    'pomni': ['pomni'],
+    'gorro de bufón': ['bufon','bufón','gorro'],
+    'caine': ['caine'],
+    'morado': ['violeta','purpura','púrpura'],
+    'muñeca de trapo': ['trapo','muñeca'],
+    'virtual': ['digital','simulado'],
+    'jax': ['jax'],
+    'accidente': ['accidental','sin querer'],
+    'caótico': ['caotico','desordenado'],
+    'bubble': ['bubble','burbuja'],
+    'abstracción': ['abstraccion','abstracto'],
+    '3d': ['tres dimensiones','tridimensional'],
+  };
+  return maps[correct] || [];
+}
+
+// ===== SIGUIENTE PREGUNTA =====
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) { endGame(); return; }
+  renderQuestion();
+}
+
+// ===== FIN DEL JUEGO =====
+async function endGame() {
+  stopTimer();
+
+  const pct = (score / questions.length) * 100;
+  let category, emoji, color;
+
+  if (score <= 10) { category = 'Fan Falso'; emoji = '😬'; color = '#ef4444'; }
+  else if (score <= 25) { category = 'Fan Promedio'; emoji = '🙂'; color = '#fbbf24'; }
+  else if (score <= 35) { category = 'Fan Sobresaliente'; emoji = '🌟'; color = '#10b981'; }
+  else { category = 'Super Fan'; emoji = '🎪'; color = '#a855f7'; launchConfetti(); }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-category').textContent = category;
+  document.getElementById('result-category').style.color = color;
+  document.getElementById('result-score').innerHTML = `Obtuviste <span>${score}</span> de 40 puntos`;
+  document.getElementById('stat-score').textContent = score;
+  document.getElementById('stat-correct').textContent = `${correctCount}/40`;
+  document.getElementById('stat-time').textContent = formatTime(totalSeconds);
+
+  showScreen('screen-result');
+
+  setTimeout(() => {
+    document.getElementById('result-bar-fill').style.width = `${pct}%`;
+  }, 300);
+
+  await saveResult(category);
+}
+
+// ===== GUARDAR RESULTADO =====
+async function saveResult(category) {
+  const err = document.getElementById('save-error');
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Ranking`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        nombre: playerName,
+        puntaje: score,
+        tiempo_seg: totalSeconds,
+        categoria: category
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.text();
+      console.error('Error guardando:', errData);
+      err.textContent = '⚠️ No se pudo guardar el resultado. Verifica la conexión.';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    console.error(e);
+    err.textContent = '⚠️ Error de conexión con la base de datos.';
+    err.style.display = 'block';
+  }
+}
+
+// ===== CARGAR RANKING =====
+async function loadRanking() {
+  const body = document.getElementById('ranking-body');
+  body.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Cargando ranking...</p></div>';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/Ranking?select=*&order=puntaje.desc,tiempo_seg.asc,created_at.asc&limit=40`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
+
+    if (!res.ok) throw new Error('Error al cargar');
+    const data = await res.json();
+
+    if (!data.length) {
+      body.innerHTML = '<div class="empty-state"><p>🎪 ¡Sé el primero en el ranking!</p></div>';
+      return;
+    }
+
+    body.innerHTML = '';
+    data.forEach((row, i) => {
+      const pos = i + 1;
+      let posClass = 'normal';
+      let posText = pos;
+      if (pos === 1) { posClass = 'gold'; posText = '🥇'; }
+      else if (pos === 2) { posClass = 'silver'; posText = '🥈'; }
+      else if (pos === 3) { posClass = 'bronze'; posText = '🥉'; }
+
+      let catClass = 'falso';
+      if (row.categoria === 'Super Fan') catClass = 'superFan';
+      else if (row.categoria === 'Fan Sobresaliente') catClass = 'sobresaliente';
+      else if (row.categoria === 'Fan Promedio') catClass = 'promedio';
+
+      const isMe = row.nombre === currentHighlightName;
+      const div = document.createElement('div');
+      div.className = `ranking-row ${isMe ? 'highlight' : ''}`;
+      div.innerHTML = `
+        <div class="rank-pos ${posClass}">${posText}</div>
+        <div class="rank-name">${escapeHtml(row.nombre)}</div>
+        <div class="rank-score">${row.puntaje}</div>
+        <div class="rank-time">${formatTime(row.tiempo_seg)}</div>
+        <div class="rank-cat ${catClass}">${row.categoria}</div>
+      `;
+      body.appendChild(div);
+    });
+  } catch(e) {
+    body.innerHTML = '<div class="empty-state"><p>⚠️ Error al cargar el ranking. Intenta de nuevo.</p></div>';
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ===== REINICIAR =====
+function restartGame() {
+  currentHighlightName = '';
+  showScreen('screen-welcome');
+}
+
+// ===== CONFETTI =====
+function launchConfetti() {
+  const colors = ['#a855f7','#ec4899','#06b6d4','#fbbf24','#10b981'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left: ${Math.random()*100}vw;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      --d: ${1.5+Math.random()*2}s;
+      --delay: ${Math.random()*1.5}s;
+      transform: rotate(${Math.random()*360}deg);
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// ===== INIT =====
+createStars();
+
+// Highlight jugador actual al ver ranking desde resultado
+const origShowScreen = showScreen;
+window.showScreen = function(id) {
+  if (id === 'screen-ranking' && playerName) {
+    currentHighlightName = playerName;
+  }
+  origShowScreen(id);
+};
+</script>
+</body>
+</html>
