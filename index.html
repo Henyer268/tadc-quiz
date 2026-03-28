@@ -829,7 +829,7 @@ const questions = [
   { q: "¿Cómo se llama la protagonista principal?", type: "mc", options: ["Ragatha","Pomni","Bubble","Kinger"], answer: 1, level: "Nivel 1 — Básico" },
   { q: "¿Qué tipo de gorro usa Pomni?", type: "mc", options: ["Sombrero de mago","Corona","Gorro de bufón","Gorra de béisbol"], answer: 2, level: "Nivel 1 — Básico" },
   { q: "¿Quién es el maestro de ceremonia del circo digital?", type: "mc", options: ["Jax","Kinger","Caine","Gangle"], answer: 2, level: "Nivel 1 — Básico" },
-  { q: "¿De qué color es el traje de Jax?", type: "mc", options: ["Rojo","Azul","Verde","Morado"], answer: 3, level: "Nivel 1 — Básico" },
+  { q: "¿De qué color es el traje de Jax?", type: "mc", options: ["Rojo","Azul","Verde","Morado"], answer: 0, level: "Nivel 1 — Básico" },
   { q: "¿Qué tipo de personaje es Ragatha?", type: "mc", options: ["Robot","Muñeca de trapo","Payaso","Marioneta"], answer: 1, level: "Nivel 1 — Básico" },
   { q: "¿El mundo del circo es real o virtual?", type: "tf", options: ["Real","Virtual"], answer: 1, level: "Nivel 1 — Básico" },
   { q: "¿Qué personaje tiene una actitud traviesa y dientes grandes?", type: "mc", options: ["Caine","Ragatha","Jax","Kinger"], answer: 2, level: "Nivel 1 — Básico" },
@@ -1005,7 +1005,6 @@ function selectMC(idx, q, grid) {
 
   const isCorrect = idx === q.answer;
   btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) btns[q.answer].classList.add('reveal');
 
   if (isCorrect) { score++; correctCount++; }
 
@@ -1033,7 +1032,6 @@ function selectTF(idx, q, grid) {
 
   const isCorrect = idx === q.answer;
   btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) btns[q.answer].classList.add('reveal');
 
   if (isCorrect) { score++; correctCount++; }
 
@@ -1074,15 +1072,15 @@ function submitOpen() {
   fb.style.display = 'block';
   if (correct === 'correct') {
     fb.className = 'answer-feedback correct';
-    fb.textContent = `✓ ¡Correcto! La respuesta es: ${q.options[q.answer]}`;
+    fb.textContent = `✓ ¡Correcto!`;
     score++; correctCount++;
   } else if (correct === 'partial') {
     fb.className = 'answer-feedback partial';
-    fb.textContent = `⚡ ¡Muy cerca! La respuesta era: ${q.options[q.answer]}`;
+    fb.textContent = `⚡ ¡Muy cerca! Cuenta como correcto.`;
     score++; correctCount++;
   } else {
     fb.className = 'answer-feedback wrong';
-    fb.textContent = `✗ Incorrecto. La respuesta era: ${q.options[q.answer]}`;
+    fb.textContent = `✗ Respuesta incorrecta.`;
   }
 
   setTimeout(() => nextQuestion(), 1800);
