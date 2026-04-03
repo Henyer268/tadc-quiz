@@ -93,12 +93,20 @@
   .lb-table tbody tr.rank-1 { background: rgba(255,215,0,0.07); }
   .lb-table tbody tr.rank-2 { background: rgba(192,192,192,0.06); }
   .lb-table tbody tr.rank-3 { background: rgba(205,127,50,0.07); }
+  .lb-table tbody tr.cheater-row { background: rgba(255,75,110,0.07); }
   .lb-rank { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
   .lb-rank.gold   { color: var(--gold); }
   .lb-rank.silver { color: var(--silver); }
   .lb-rank.bronze { color: var(--bronze); }
   .lb-rank.normal { color: var(--muted); }
   .lb-name { font-weight: 800; }
+  .lb-name.cheater { color: var(--red); }
+  .lb-cheat-badge {
+    font-size: 0.65rem; font-weight: 800;
+    background: rgba(255,75,110,0.2); border: 1px solid rgba(255,75,110,0.4);
+    color: var(--red); border-radius: 20px; padding: 2px 7px;
+    margin-left: 6px; vertical-align: middle; letter-spacing: 0.5px;
+  }
   .lb-score { color: var(--accent3); font-family: 'Fredoka One', cursive; font-size: 1rem; }
   .lb-time { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
   .lb-date { color: var(--muted); font-size: 0.78rem; }
@@ -381,6 +389,7 @@
   .cheat-msg { color: var(--muted); font-size: 1rem; max-width: 420px; line-height: 1.6; margin-bottom: 28px; }
   .cheat-score { font-size: 2.5rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
   .cheat-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .cheat-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
   .cheat-btn {
     background: linear-gradient(135deg, var(--red), #c8004b);
     border: none; border-radius: 50px; padding: 14px 44px;
@@ -388,6 +397,14 @@
     cursor: pointer; transition: opacity 0.2s;
   }
   .cheat-btn:hover { opacity: 0.85; }
+  .cheat-btn-lb {
+    background: var(--card2); border: 1px solid var(--accent4);
+    border-radius: 50px; padding: 14px 32px;
+    color: var(--accent4); font-family: 'Fredoka One', cursive; font-size: 1rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .cheat-btn-lb:hover { background: rgba(255,233,75,0.08); }
+  .cheat-save-note { font-size: 0.8rem; color: var(--muted); margin-top: 14px; font-style: italic; }
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   @keyframes pulse  { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
@@ -443,13 +460,17 @@
   <div class="cheat-msg">Saliste de la encuesta. El quiz fue cerrado automáticamente y las preguntas no respondidas cuentan como incorrectas.</div>
   <div class="cheat-score" id="cheat-score-display">0/52</div>
   <div class="cheat-sub" id="cheat-score-sub"></div>
-  <button class="cheat-btn" onclick="resetToChar()">Empezar de nuevo</button>
+  <div id="cheat-save-status" class="cheat-save-note"></div>
+  <div class="cheat-actions" style="margin-top:24px;">
+    <button class="cheat-btn" onclick="resetToChar()">Empezar de nuevo</button>
+    <button class="cheat-btn-lb" onclick="goLeaderboardFromCheat()">Ver tabla</button>
+  </div>
 </div>
 
 <!-- ═══════════════ LEADERBOARD SCREEN ═══════════════ -->
 <div id="leaderboard-screen">
   <div class="lb-title">Tabla de Campeones</div>
-  <div class="lb-sub">Los mejores jugadores del Circo Digital · Ordenado por puntos, luego por tiempo</div>
+  <div class="lb-sub">Los mejores jugadores del Circo Digital · Ordenado por puntos, luego por tiempo · 🔴 = trampa detectada</div>
   <div id="lb-config-notice" style="display:none;">
     <div class="config-notice">
       <strong>Supabase no configurado.</strong> Para activar la tabla, edita el archivo y reemplaza
@@ -546,6 +567,7 @@ const characters = [
 let selectedChar = null;
 let quizActive   = false;
 let cheated      = false;
+let cheatSaved   = false;
 
 // ── Timer ──
 let timerInterval = null;
@@ -611,66 +633,109 @@ function selectChar(idx) {
 
 // ═══════════════════════════════════════════
 //  BANCO DE PREGUNTAS
+//  NOTA: opts[] shuffled para que la respuesta
+//  correcta NO esté siempre en la última posición.
+//  ans = índice de la respuesta correcta en opts[].
 // ═══════════════════════════════════════════
 const sections = [
   {
     id:"easy", label:"FACIL — Nivel 1", cls:"easy", dot:"dot-easy",
     questions:[
-      {id:1,text:"¿Cómo se llama la protagonista principal?",opts:["Ragatha","Gangle","Pomni","Zooble","Bubble","Kaufmo"],ans:2},
-      {id:2,text:"¿Quién es el maestro de ceremonias?",opts:["Jax","Kinger","Ragatha","Caine","Bubble","Zooble"],ans:3},
+      // ans en pos 0 (primera)
+      {id:1,text:"¿Cómo se llama la protagonista principal?",opts:["Pomni","Ragatha","Gangle","Zooble","Bubble","Kaufmo"],ans:0},
+      // ans en pos 1 (segunda)
+      {id:2,text:"¿Quién es el maestro de ceremonias?",opts:["Jax","Caine","Kinger","Ragatha","Bubble","Zooble"],ans:1},
+      // ans en pos 4 (quinta)
       {id:3,text:"¿Qué accesorio lleva Pomni en la cabeza?",opts:["Sombrero de mago","Corona de colores","Casco de payaso","Gorra de béisbol","Gorro de bufón","Tiara brillante"],ans:4},
-      {id:4,text:"¿De qué color es principalmente el traje de Pomni?",opts:["Rosa y blanco","Morado y negro","Verde y amarillo","Rojo y dorado","Azul y blanco","Celeste y gris"],ans:4},
-      {id:5,text:"¿Jax es un…?",opts:["Gato","Perro","Zorro","Oso","Lobo","Conejo"],ans:5},
+      // ans en pos 2 (tercera)
+      {id:4,text:"¿De qué color es principalmente el traje de Pomni?",opts:["Rosa y blanco","Morado y negro","Azul y rojo","Verde y amarillo","Celeste y gris","Dorado y plateado"],ans:2},
+      // ans en pos 0 (primera)
+      {id:5,text:"¿Jax es un…?",opts:["Conejo","Gato","Perro","Zorro","Oso","Lobo"],ans:0},
+      // V/F — ans en pos 0
       {id:6,text:"¿Ragatha es una muñeca de trapo?",opts:["Verdadero","Falso"],ans:0,tf:true},
+      // V/F — ans en pos 1
       {id:7,text:"¿El Circo Digital existe en el mundo real?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      {id:8,text:"¿Cómo se llama el personaje que flota como burbuja?",opts:["Glitch","Orbie","Float","Sphera","Blob","Bubble"],ans:5},
+      // ans en pos 3 (cuarta)
+      {id:8,text:"¿Cómo se llama el personaje que flota como burbuja?",opts:["Glitch","Orbie","Float","Bubble","Sphera","Blob"],ans:3},
+      // V/F — ans en pos 1
       {id:9,text:"¿Pomni llega al circo feliz y emocionada?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      {id:10,text:"¿De qué color son las orejas de Jax?",opts:["Rojas","Negras","Azules","Verdes","Moradas","Blancas"],ans:4},
+      // ans en pos 1 (segunda)
+      {id:10,text:"¿De qué color son las orejas de Jax?",opts:["Rojas","Moradas","Negras","Azules","Verdes","Blancas"],ans:1},
     ]
   },
   {
     id:"medium", label:"INTERMEDIO — Nivel 2", cls:"medium", dot:"dot-medium",
     questions:[
-      {id:11,text:"¿Cómo se llama el proceso cuando un personaje pierde la cordura?",opts:["Fragmentación","Digitalización","Corrupción","Disociación","Colapso mental","Abstracción"],ans:5},
-      {id:12,text:"¿Qué personaje tiene parches de corazones?",opts:["Gangle","Pomni","Zooble","Bubble","Ragatha","Kinger"],ans:4},
+      // ans en pos 4 (quinta)
+      {id:11,text:"¿Cómo se llama el proceso cuando un personaje pierde la cordura?",opts:["Fragmentación","Digitalización","Corrupción","Disociación","Abstracción","Colapso mental"],ans:4},
+      // ans en pos 0 (primera)
+      {id:12,text:"¿Qué personaje tiene parches de corazones?",opts:["Ragatha","Gangle","Pomni","Zooble","Bubble","Kinger"],ans:0},
+      // V/F — ans en pos 1
       {id:13,text:"¿Kinger es el más estable mentalmente?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      {id:14,text:"¿Qué forma tiene la cabeza de Kinger?",opts:["Cuadrada","Circular","Triangular","De dado","De corona","De rey de ajedrez"],ans:5},
-      {id:15,text:"¿De qué material es la máscara de Gangle?",opts:["Metal","Madera","Cristal","Porcelana","Plástico","Tela endurecida"],ans:3},
-      {id:16,text:"¿Cuántos personajes principales hay al inicio?",opts:["4","5","7","8","6","9"],ans:4},
+      // ans en pos 2 (tercera)
+      {id:14,text:"¿Qué forma tiene la cabeza de Kinger?",opts:["Cuadrada","Circular","De rey de ajedrez","Triangular","De dado","De corona"],ans:2},
+      // ans en pos 1 (segunda)
+      {id:15,text:"¿De qué material es la máscara de Gangle?",opts:["Metal","Porcelana","Cristal","Madera","Plástico","Tela endurecida"],ans:1},
+      // ans en pos 3 (cuarta)
+      {id:16,text:"¿Cuántos personajes principales hay al inicio?",opts:["4","5","7","6","8","9"],ans:3},
+      // V/F — ans en pos 0
       {id:17,text:"¿Zooble puede cambiar la forma de su cuerpo?",opts:["Verdadero","Falso"],ans:0,tf:true},
-      {id:18,text:"¿Qué personaje se abstrae en el episodio piloto?",opts:["Kinger","Gangle","Zooble","Jax","Ragatha","Kaufmo"],ans:5},
-      {id:19,text:"¿Qué color predomina en el diseño del circo?",opts:["Oscuro y negro","Pastel y suave","Rojo y dorado","Blanco y plateado","Gris y azul","Colores vivos y saturados"],ans:5},
+      // ans en pos 0 (primera)
+      {id:18,text:"¿Qué personaje se abstrae en el episodio piloto?",opts:["Kaufmo","Kinger","Gangle","Zooble","Jax","Ragatha"],ans:0},
+      // ans en pos 4 (quinta)
+      {id:19,text:"¿Qué color predomina en el diseño del circo?",opts:["Oscuro y negro","Pastel y suave","Rojo y dorado","Blanco y plateado","Colores vivos y saturados","Gris y azul"],ans:4},
+      // V/F — ans en pos 0
       {id:20,text:"¿Caine puede modificar el entorno del circo?",opts:["Verdadero","Falso"],ans:0,tf:true},
     ]
   },
   {
     id:"hard", label:"DIFICIL — Nivel 3", cls:"hard", dot:"dot-hard",
     questions:[
-      {id:21,text:"¿Cómo se llama el personaje abstracto del piloto?",opts:["Kaufmo","Koufmo","Darkmo","Glitchmo","Void","Chaosmo"],ans:0},
-      {id:22,text:"¿Qué emoción muestra Ragatha hacia Pomni al llegar?",opts:["Entusiasmo y alegría","Ternura protectora","Empatía y amabilidad","Cariño maternal","Curiosidad amistosa","Indiferencia fría"],ans:2},
-      {id:23,text:"¿Qué ocurre al entorno cuando hay un error del sistema?",opts:["Los personajes pierden sus colores progresivamente","Aparecen sombras y el escenario se oscurece","El tiempo dentro del circo se detiene por completo","Se vuelve glitchy e incompleto","Los personajes quedan suspendidos en el aire","Las paredes del circo empiezan a desaparecer"],ans:3},
-      {id:24,text:"¿Por qué Kinger se comporta de forma errática?",opts:["Es su personalidad de origen","Tuvo una mala experiencia en una aventura","Fue afectado por una abstracción parcial","Perdió a su mejor amigo en el circo","Tiene un defecto en su código digital","Lleva más tiempo que nadie atrapado en el circo"],ans:5},
-      {id:25,text:"¿Qué dos emociones representan las máscaras de Gangle?",opts:["Ira y calma","Miedo y valentía","Amor y odio","Sorpresa y aburrimiento","Vergüenza y orgullo","Tristeza y felicidad"],ans:5},
-      {id:26,text:"¿Qué actitud tiene Jax ante el peligro real?",opts:["Se vuelve el líder del grupo","Entra en pánico silencioso","Huye sin avisar a nadie","Busca proteger a Pomni","Pide ayuda a Caine inmediatamente","Sigue siendo burlón e indiferente"],ans:5},
+      // ans en pos 1 (segunda)
+      {id:21,text:"¿Cómo se llama el personaje abstracto del piloto?",opts:["Koufmo","Kaufmo","Darkmo","Glitchmo","Void","Chaosmo"],ans:1},
+      // ans en pos 0 (primera)
+      {id:22,text:"¿Qué emoción muestra Ragatha hacia Pomni al llegar?",opts:["Empatía y amabilidad","Entusiasmo y alegría","Ternura protectora","Cariño maternal","Curiosidad amistosa","Indiferencia fría"],ans:0},
+      // ans en pos 2 (tercera)
+      {id:23,text:"¿Qué ocurre al entorno cuando hay un error del sistema?",opts:["Los personajes pierden sus colores progresivamente","Aparecen sombras y el escenario se oscurece","Se vuelve glitchy e incompleto","El tiempo dentro del circo se detiene por completo","Los personajes quedan suspendidos en el aire","Las paredes del circo empiezan a desaparecer"],ans:2},
+      // ans en pos 3 (cuarta)
+      {id:24,text:"¿Por qué Kinger se comporta de forma errática?",opts:["Es su personalidad de origen","Tuvo una mala experiencia en una aventura","Fue afectado por una abstracción parcial","Lleva más tiempo que nadie atrapado en el circo","Tiene un defecto en su código digital","Perdió a su mejor amigo en el circo"],ans:3},
+      // ans en pos 0 (primera)
+      {id:25,text:"¿Qué dos emociones representan las máscaras de Gangle?",opts:["Tristeza y felicidad","Ira y calma","Miedo y valentía","Amor y odio","Sorpresa y aburrimiento","Vergüenza y orgullo"],ans:0},
+      // ans en pos 4 (quinta)
+      {id:26,text:"¿Qué actitud tiene Jax ante el peligro real?",opts:["Se vuelve el líder del grupo","Entra en pánico silencioso","Huye sin avisar a nadie","Busca proteger a Pomni","Sigue siendo burlón e indiferente","Pide ayuda a Caine inmediatamente"],ans:4},
+      // V/F — ans en pos 0
       {id:27,text:"¿Hay zonas sin terminar fuera del escenario principal?",opts:["Verdadero","Falso"],ans:0,tf:true},
-      {id:28,text:"¿Qué intenta Pomni antes de unirse a la aventura?",opts:["Conocer a todos los personajes","Hablar con Caine sobre las reglas","Explorar el escenario principal","Entender el funcionamiento del circo","Hacer amistad con Ragatha","Encontrar una salida del circo"],ans:5},
-      {id:29,text:"¿Cómo reacciona Caine cuando Pomni pregunta cómo salir?",opts:["Le explica que es imposible salir","Se molesta y la ignora","Le promete buscar una solución","Le dice que pregunte a Ragatha","Se pone triste y cambia el tema","Evita la pregunta y la redirige a la aventura"],ans:5},
-      {id:30,text:"¿Qué hace único a Zooble frente a los demás?",opts:["Es el único que recuerda su vida pasada","Puede salir brevemente del circo","No participa en ninguna aventura","Tiene acceso a zonas prohibidas","Habla directamente con el sistema del circo","Su cuerpo está hecho de partes intercambiables"],ans:5},
+      // ans en pos 2 (tercera)
+      {id:28,text:"¿Qué intenta Pomni antes de unirse a la aventura?",opts:["Conocer a todos los personajes","Hablar con Caine sobre las reglas","Encontrar una salida del circo","Explorar el escenario principal","Entender el funcionamiento del circo","Hacer amistad con Ragatha"],ans:2},
+      // ans en pos 1 (segunda)
+      {id:29,text:"¿Cómo reacciona Caine cuando Pomni pregunta cómo salir?",opts:["Le explica que es imposible salir","Evita la pregunta y la redirige a la aventura","Se molesta y la ignora","Le promete buscar una solución","Le dice que pregunte a Ragatha","Se pone triste y cambia el tema"],ans:1},
+      // ans en pos 3 (cuarta)
+      {id:30,text:"¿Qué hace único a Zooble frente a los demás?",opts:["Es el único que recuerda su vida pasada","Puede salir brevemente del circo","No participa en ninguna aventura","Su cuerpo está hecho de partes intercambiables","Tiene acceso a zonas prohibidas","Habla directamente con el sistema del circo"],ans:3},
     ]
   },
   {
     id:"extreme", label:"MUY DIFICIL — Nivel 4", cls:"extreme", dot:"dot-extreme",
     questions:[
-      {id:31,text:"¿En qué plataforma se estrenó la serie?",opts:["Netflix","Disney+","Amazon Prime","Cartoon Network","Vimeo","YouTube"],ans:5},
-      {id:32,text:"¿Quién es la creadora principal de la serie?",opts:["Vivienne Medrano","Rebecca Sugar","Natalie Lawhead","Liam Vickers","Julia Vickerman","Gooseworx"],ans:5},
-      {id:33,text:"¿Cuánto dura exactamente el episodio piloto?",opts:["22:30 minutos","28:10 minutos","25:45 minutos","24:00 minutos","27:15 minutos","26:50 minutos"],ans:2},
-      {id:34,text:"¿Qué teoría tiene el fandom sobre el origen de los personajes?",opts:["Son robots creados por Caine","Son personajes de videojuegos abandonados","Son fragmentos de la mente de Caine","Son almas atrapadas en un servidor","Son clones digitales de personas fallecidas","Son personas reales atrapadas digitalmente"],ans:5},
-      {id:35,text:"¿Cuántas visualizaciones obtuvo el piloto en su primera semana?",opts:["5 millones","20 millones","50 millones","75 millones","200 millones","100 millones"],ans:5},
-      {id:36,text:"¿Cuál es el nombre del estudio de animación?",opts:["Spindlehorse","Toon Boom Studios","Digital Circus Studio","Hazbin Productions","Cartoon Saloon","Glitch Productions"],ans:5},
-      {id:37,text:"¿Qué detalle de Pomni sugiere que lleva tiempo en el circo?",opts:["Sus zapatos están desgastados","Conoce algunas reglas sin que nadie se las diga","Habla con familiaridad con Caine","Ya no reacciona con sorpresa ante el entorno","Tiene marcas en su traje de uso prolongado","Sus ojos ya tienen la apariencia digital desde el inicio"],ans:5},
-      {id:38,text:"¿Qué simboliza la abstracción según el fandom?",opts:["La muerte dentro del juego","Una actualización forzada del personaje","El reinicio del sistema del circo","Una penalización por romper las reglas","La fusión del personaje con el sistema","La locura total al perder la identidad humana"],ans:5},
-      {id:39,text:"¿Qué canción acompaña la introducción de la serie?",opts:["Welcome to the Greatest Show on Earth","Step Right Up to the Digital Stage","Welcome to the Digital Circus","Enter the Ring of Digital Dreams","The Circus of Infinite Wonders Begins","Come Join the Show Inside the Machine"],ans:2},
-      {id:40,text:"¿Qué le ocurre a un personaje completamente abstraído?",opts:["Es eliminado del sistema permanentemente","Se convierte en un NPC del circo","Es enviado a una zona de cuarentena","Pierde sus colores y se vuelve transparente","Queda suspendido en una dimensión paralela","Se vuelve una entidad caótica sin consciencia propia"],ans:5},
+      // ans en pos 2 (tercera)
+      {id:31,text:"¿En qué plataforma se estrenó la serie?",opts:["Netflix","Disney+","YouTube","Amazon Prime","Cartoon Network","Vimeo"],ans:2},
+      // ans en pos 0 (primera)
+      {id:32,text:"¿Quién es la creadora principal de la serie?",opts:["Gooseworx","Vivienne Medrano","Rebecca Sugar","Natalie Lawhead","Liam Vickers","Julia Vickerman"],ans:0},
+      // ans en pos 1 (segunda)
+      {id:33,text:"¿Cuánto dura exactamente el episodio piloto?",opts:["22:30 minutos","25:45 minutos","28:10 minutos","24:00 minutos","27:15 minutos","26:50 minutos"],ans:1},
+      // ans en pos 3 (cuarta)
+      {id:34,text:"¿Qué teoría tiene el fandom sobre el origen de los personajes?",opts:["Son robots creados por Caine","Son personajes de videojuegos abandonados","Son fragmentos de la mente de Caine","Son personas reales atrapadas digitalmente","Son almas atrapadas en un servidor","Son clones digitales de personas fallecidas"],ans:3},
+      // ans en pos 4 (quinta)
+      {id:35,text:"¿Cuántas visualizaciones obtuvo el piloto en su primera semana?",opts:["5 millones","20 millones","50 millones","75 millones","100 millones","200 millones"],ans:4},
+      // ans en pos 0 (primera)
+      {id:36,text:"¿Cuál es el nombre del estudio de animación?",opts:["Glitch Productions","Spindlehorse","Toon Boom Studios","Digital Circus Studio","Hazbin Productions","Cartoon Saloon"],ans:0},
+      // ans en pos 2 (tercera)
+      {id:37,text:"¿Qué detalle de Pomni sugiere que lleva tiempo en el circo?",opts:["Sus zapatos están desgastados","Conoce algunas reglas sin que nadie se las diga","Sus ojos ya tienen la apariencia digital desde el inicio","Habla con familiaridad con Caine","Ya no reacciona con sorpresa ante el entorno","Tiene marcas en su traje de uso prolongado"],ans:2},
+      // ans en pos 1 (segunda)
+      {id:38,text:"¿Qué simboliza la abstracción según el fandom?",opts:["La muerte dentro del juego","La locura total al perder la identidad humana","Una actualización forzada del personaje","El reinicio del sistema del circo","La fusión del personaje con el sistema","Una penalización por romper las reglas"],ans:1},
+      // ans en pos 0 (primera)
+      {id:39,text:"¿Qué canción acompaña la introducción de la serie?",opts:["Welcome to the Digital Circus","Welcome to the Greatest Show on Earth","Step Right Up to the Digital Stage","Enter the Ring of Digital Dreams","The Circus of Infinite Wonders Begins","Come Join the Show Inside the Machine"],ans:0},
+      // ans en pos 3 (cuarta)
+      {id:40,text:"¿Qué le ocurre a un personaje completamente abstraído?",opts:["Es eliminado del sistema permanentemente","Se convierte en un NPC del circo","Es enviado a una zona de cuarentena","Se vuelve una entidad caótica sin consciencia propia","Pierde sus colores y se vuelve transparente","Queda suspendido en una dimensión paralela"],ans:3},
     ]
   },
   {
@@ -766,7 +831,13 @@ function renderLeaderboard(rows) {
     if (i === 2) return '<span class="lb-rank bronze">3</span>';
     return `<span class="lb-rank normal">${i + 1}</span>`;
   };
-  const rankCls = i => i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+  const rankCls = (i, isCheater) => {
+    if (isCheater) return 'cheater-row';
+    if (i === 0) return 'rank-1';
+    if (i === 1) return 'rank-2';
+    if (i === 2) return 'rank-3';
+    return '';
+  };
   const fmtDate = iso => {
     const d = new Date(iso);
     return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'2-digit' });
@@ -787,10 +858,13 @@ function renderLeaderboard(rows) {
   `;
   rows.forEach((r, i) => {
     const pct = Math.round((r.score / 52) * 100);
+    const isCheater = r.cheated === true;
+    const cheatBadge = isCheater ? '<span class="lb-cheat-badge">TRAMPA</span>' : '';
+    const nameClass = isCheater ? 'lb-name cheater' : 'lb-name';
     html += `
-      <tr class="${rankCls(i)}">
+      <tr class="${rankCls(i, isCheater)}">
         <td>${rankLabel(i)}</td>
-        <td class="lb-name">${escapeHtml(r.character_name)}</td>
+        <td class="${nameClass}">${escapeHtml(r.character_name)}${cheatBadge}</td>
         <td>
           <span class="lb-score">${r.score}/52</span>
           <span class="lb-pct" style="color:${pctColor(pct)};background:${pctColor(pct)}18;margin-left:6px;">${pct}%</span>
@@ -820,6 +894,7 @@ function startQuiz() {
   document.getElementById('player-badge-display').textContent = `Jugando como: ${c.name}`;
 
   cheated = false;
+  cheatSaved = false;
   quizActive = true;
   correct = 0; wrong = 0; done = 0;
   Object.keys(answered).forEach(k => delete answered[k]);
@@ -835,7 +910,6 @@ function startQuiz() {
 function buildQuiz() {
   const container = document.getElementById('questions-container');
   container.innerHTML = '';
-  const sectionColors = { easy:'var(--easy)', medium:'var(--medium)', hard:'var(--hard)', extreme:'var(--extreme)', ultra:'var(--ultra)', definitive:'var(--definitive)' };
   sections.forEach(sec => {
     const sh = document.createElement('div');
     sh.className = `section-header ${sec.cls}`;
@@ -1049,7 +1123,9 @@ async function saveResult(wasCheat) {
       cheated:        wasCheat
     });
     ss.className = 'save-status saved';
-    ss.textContent = 'Resultado guardado en la tabla de campeones.';
+    ss.textContent = wasCheat
+      ? '⚠️ Resultado guardado como TRAMPA en la tabla de campeones.'
+      : 'Resultado guardado en la tabla de campeones.';
   } catch (e) {
     ss.className = 'save-status save-err';
     ss.textContent = `No se pudo guardar: ${e.message}`;
@@ -1061,25 +1137,61 @@ async function saveResult(wasCheat) {
 // ═══════════════════════════════════════════
 function resetToChar() {
   stopTimer();
-  quizActive = false; cheated = false;
+  quizActive = false; cheated = false; cheatSaved = false;
   correct = 0; wrong = 0; done = 0;
   Object.keys(answered).forEach(k => delete answered[k]);
   document.getElementById('cheat-overlay').classList.remove('active');
   showCharScreen();
 }
 
+function goLeaderboardFromCheat() {
+  document.getElementById('cheat-overlay').classList.remove('active');
+  showLeaderboard();
+}
+
 // ═══════════════════════════════════════════
-//  ANTI-CHEAT
+//  ANTI-CHEAT — guarda resultado al detectar trampa
 // ═══════════════════════════════════════════
-function triggerCheat() {
+async function triggerCheat() {
   if (!quizActive || cheated) return;
   cheated = true; quizActive = false;
   stopTimer();
+
+  // Marcar preguntas sin responder como incorrectas
+  sections.forEach(sec => {
+    sec.questions.forEach(q => {
+      if (!answered[q.id]) {
+        answered[q.id] = 'cheat-wrong';
+        wrong++; done++;
+      }
+    });
+  });
+  updateScore();
+
   document.getElementById('cheat-score-display').textContent = `${correct}/52`;
   document.getElementById('cheat-score-sub').textContent =
-    `${done} respondidas · ${52 - done} sin responder (contadas como incorrectas)`;
+    `${done} respondidas · ${52 - done > 0 ? 0 : ''} · ${wrong} incorrectas en total`;
   document.getElementById('cheat-overlay').classList.add('active');
   document.getElementById('quiz-screen').style.display = 'none';
+
+  // Guardar en BD como trampa
+  if (!cheatSaved && isConfigured() && selectedChar !== null) {
+    cheatSaved = true;
+    const saveNote = document.getElementById('cheat-save-note');
+    saveNote.textContent = 'Guardando resultado...';
+    try {
+      await sbInsert({
+        character_name: characters[selectedChar].name,
+        score:          correct,
+        total:          52,
+        time_seconds:   timerSeconds,
+        cheated:        true
+      });
+      saveNote.textContent = '⚠️ Resultado registrado en la tabla como TRAMPA.';
+    } catch (e) {
+      saveNote.textContent = `No se pudo guardar: ${e.message}`;
+    }
+  }
 }
 
 document.addEventListener('visibilitychange', () => { if (document.hidden) triggerCheat(); });
