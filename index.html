@@ -1,1225 +1,425 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TADC Quiz — ¿Cuánto sabes del Circo Digital?</title>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TADC Quiz — El Circo Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0a0a1a;
-    --card: #12122a;
-    --card2: #1a1a35;
-    --purple: #7c3aed;
-    --purple2: #a855f7;
-    --pink: #ec4899;
-    --cyan: #06b6d4;
-    --yellow: #fbbf24;
-    --green: #10b981;
-    --red: #ef4444;
-    --text: #f1f0ff;
-    --muted: #8b8aaa;
-    --border: rgba(124,58,237,0.3);
+    --bg: #0d0a1a;
+    --card: #1a1530;
+    --card2: #221d3a;
+    --border: #3a2f6a;
+    --accent1: #c84bff;
+    --accent2: #ff4ba0;
+    --accent3: #4bffd5;
+    --accent4: #ffe94b;
+    --text: #f0eaff;
+    --muted: #9080b0;
+    --green: #4bff9a;
+    --red: #ff4b6e;
+    --easy: #4bff9a;
+    --medium: #ffe94b;
+    --hard: #ff7c4b;
+    --extreme: #c84bff;
+    --ultra: #ff4ba0;
+    --definitive: #4bffd5;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Nunito', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative;
   }
-
-  /* Animated background */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(236,72,153,0.1) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(200,75,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 70%, rgba(75,255,213,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 60% 15%, rgba(255,233,75,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 50%, rgba(255,75,160,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 85%, rgba(75,255,154,0.3) 0%, transparent 100%);
+    pointer-events: none; z-index: 0;
   }
+  .wrapper { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 20px 16px 60px; }
 
-  .stars {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: white;
-    border-radius: 50%;
-    animation: twinkle var(--d) ease-in-out infinite var(--delay);
-  }
-
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.5); }
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+  /* ── LEADERBOARD SCREEN ── */
+  #leaderboard-screen {
+    display: none;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    padding: 40px 16px 60px;
+    position: relative; z-index: 1;
+    max-width: 700px; margin: 0 auto;
   }
-
-  /* ===== SCREENS ===== */
-  .screen { display: none; width: 100%; animation: fadeIn 0.4s ease; }
-  .screen.active { display: flex; flex-direction: column; align-items: center; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  #leaderboard-screen.show { display: block; animation: fadeIn 0.4s ease; }
+  .lb-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    background: linear-gradient(135deg, var(--accent4), var(--accent2), var(--accent1));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px rgba(255,233,75,0.3));
+    text-align: center; margin-bottom: 6px;
   }
-
-  /* ===== WELCOME SCREEN ===== */
-  .logo-title {
-    font-family: 'Bangers', cursive;
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    letter-spacing: 3px;
-    text-align: center;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--purple2), var(--pink), var(--cyan));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 30px rgba(168,85,247,0.5));
-    animation: glow 3s ease-in-out infinite;
-  }
-
-  @keyframes glow {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(168,85,247,0.4)); }
-    50% { filter: drop-shadow(0 0 40px rgba(236,72,153,0.6)); }
-  }
-
-  .logo-sub {
-    font-family: 'Bangers', cursive;
-    font-size: clamp(1rem, 3vw, 1.5rem);
-    letter-spacing: 6px;
-    color: var(--cyan);
-    text-align: center;
-    margin-top: 8px;
-    opacity: 0.8;
-  }
-
-  .circus-emoji {
-    font-size: 4rem;
-    text-align: center;
-    margin: 20px 0;
-    animation: bounce 2s ease-in-out infinite;
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-15px) rotate(5deg); }
-  }
-
-  .welcome-card {
-    background: var(--card);
+  .lb-sub { color: var(--muted); font-size: 0.9rem; text-align: center; margin-bottom: 28px; }
+  .lb-loading { text-align: center; color: var(--muted); padding: 40px; font-size: 1rem; }
+  .lb-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--card); border-radius: 18px; overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 30px;
-    width: 100%;
-    max-width: 500px;
-    margin: 20px 0;
-    text-align: center;
   }
-
-  .welcome-card p {
+  .lb-table thead tr {
+    background: var(--card2);
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px;
     color: var(--muted);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 20px;
   }
-
-  .categories-preview {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 20px 0;
+  .lb-table th, .lb-table td {
+    padding: 12px 16px; text-align: left;
   }
-
-  .cat-badge {
-    padding: 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: center;
+  .lb-table th:last-child, .lb-table td:last-child { text-align: right; }
+  .lb-table th:nth-child(3), .lb-table td:nth-child(3) { text-align: center; }
+  .lb-table tbody tr {
+    border-top: 1px solid var(--border);
+    transition: background 0.15s;
+    font-weight: 700; font-size: 0.9rem;
   }
-
-  .cat-badge.false { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
-  .cat-badge.avg { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; }
-  .cat-badge.good { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
-  .cat-badge.super { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #d8b4fe; }
-
-  .input-group {
-    margin: 20px 0;
-    text-align: left;
-  }
-
-  .input-group label {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--purple2);
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .input-group input {
-    width: 100%;
-    background: var(--card2);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-
-  .input-group input:focus {
-    border-color: var(--purple2);
-    box-shadow: 0 0 0 4px rgba(168,85,247,0.1);
-  }
-
-  .input-group input::placeholder { color: var(--muted); font-weight: 400; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px 32px;
-    border: none;
-    border-radius: 14px;
-    font-family: 'Bangers', cursive;
-    font-size: 1.3rem;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    color: white;
-    box-shadow: 0 4px 20px rgba(124,58,237,0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(124,58,237,0.6);
-  }
-
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-secondary {
-    background: var(--card2);
-    border: 2px solid var(--border);
-    color: var(--purple2);
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--purple2);
-    background: rgba(168,85,247,0.1);
-  }
-
-  /* ===== QUIZ SCREEN ===== */
-  .quiz-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    gap: 15px;
-  }
-
-  .q-counter {
-    font-family: 'Bangers', cursive;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-    color: var(--purple2);
-    white-space: nowrap;
-  }
-
-  .progress-bar {
-    flex: 1;
-    height: 8px;
-    background: var(--card2);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--purple), var(--pink));
-    border-radius: 10px;
-    transition: width 0.4s ease;
-  }
-
-  .timer-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--card2);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-family: 'Bangers', cursive;
-    font-size: 1.3rem;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    transition: border-color 0.3s;
-  }
-
-  .timer-box.warning { border-color: var(--yellow); color: var(--yellow); }
-  .timer-box.danger { border-color: var(--red); color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
-
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-
-  .score-live {
-    font-family: 'Bangers', cursive;
-    font-size: 1.1rem;
-    color: var(--green);
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  .question-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 30px;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-
-  .question-level {
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    opacity: 0.7;
-  }
-
-  .question-type-badge {
+  .lb-table tbody tr:hover { background: rgba(200,75,255,0.05); }
+  .lb-table tbody tr.rank-1 { background: rgba(255,215,0,0.07); }
+  .lb-table tbody tr.rank-2 { background: rgba(192,192,192,0.06); }
+  .lb-table tbody tr.rank-3 { background: rgba(205,127,50,0.07); }
+  .lb-rank { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+  .lb-rank.gold   { color: var(--gold); }
+  .lb-rank.silver { color: var(--silver); }
+  .lb-rank.bronze { color: var(--bronze); }
+  .lb-rank.normal { color: var(--muted); }
+  .lb-name { font-weight: 800; }
+  .lb-score { color: var(--accent3); font-family: 'Fredoka One', cursive; font-size: 1rem; }
+  .lb-time { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+  .lb-date { color: var(--muted); font-size: 0.78rem; }
+  .lb-pct {
+    font-size: 0.75rem; font-weight: 800;
+    padding: 3px 8px; border-radius: 20px;
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
   }
-
-  .type-mc { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
-  .type-tf { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
-  .type-open { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
-
-  .question-text {
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-    font-weight: 800;
-    line-height: 1.5;
-    color: var(--text);
+  .lb-empty { text-align: center; color: var(--muted); padding: 40px; font-size: 0.95rem; }
+  .lb-actions {
+    display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap;
   }
-
-  /* Multiple choice */
-  .options-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    width: 100%;
+  .lb-btn {
+    background: linear-gradient(135deg, var(--accent3), var(--accent1));
+    border: none; border-radius: 50px; padding: 13px 36px;
+    color: #0d0a1a; font-family: 'Fredoka One', cursive;
+    font-size: 1rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
   }
-
-  @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
-
-  .option-btn {
-    background: var(--card2);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .option-btn:hover:not(:disabled) {
-    border-color: var(--purple2);
-    background: rgba(168,85,247,0.1);
-    transform: translateY(-2px);
-  }
-
-  .option-btn.correct {
-    border-color: var(--green);
-    background: rgba(16,185,129,0.15);
-    color: #6ee7b7;
-  }
-
-  .option-btn.wrong {
-    border-color: var(--red);
-    background: rgba(239,68,68,0.15);
-    color: #fca5a5;
-  }
-
-  .option-btn.reveal {
-    border-color: var(--green);
-    background: rgba(16,185,129,0.1);
-    opacity: 0.6;
-  }
-
-  .option-letter {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: rgba(168,85,247,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bangers', cursive;
-    font-size: 1rem;
-    flex-shrink: 0;
-    color: var(--purple2);
-  }
-
-  /* True/False */
-  .tf-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    width: 100%;
-  }
-
-  .tf-btn {
-    padding: 24px;
-    border-radius: 16px;
-    border: 2px solid var(--border);
-    background: var(--card2);
-    color: var(--text);
-    font-family: 'Bangers', cursive;
-    font-size: 1.6rem;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .tf-btn.verdadero:hover:not(:disabled) { border-color: var(--green); background: rgba(16,185,129,0.1); }
-  .tf-btn.falso:hover:not(:disabled) { border-color: var(--red); background: rgba(239,68,68,0.1); }
-  .tf-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.2); color: #6ee7b7; }
-  .tf-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.2); color: #fca5a5; }
-  .tf-btn.reveal { border-color: var(--green); background: rgba(16,185,129,0.1); opacity: 0.6; }
-
-  /* Open answer */
-  .open-answer-area {
-    width: 100%;
-  }
-
-  .open-answer-area textarea {
-    width: 100%;
-    background: var(--card2);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    outline: none;
-    resize: none;
-    height: 100px;
-    transition: border-color 0.3s;
-    margin-bottom: 12px;
-  }
-
-  .open-answer-area textarea:focus {
-    border-color: var(--purple2);
-    box-shadow: 0 0 0 4px rgba(168,85,247,0.1);
-  }
-
-  .open-answer-area textarea::placeholder { color: var(--muted); font-weight: 400; }
-
-  .answer-feedback {
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-top: 10px;
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .answer-feedback.correct { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
-  .answer-feedback.wrong { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
-  .answer-feedback.partial { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; }
-
-  .next-btn-area {
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  /* ===== RESULT SCREEN ===== */
-  .result-card {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 24px;
-    padding: 40px 30px;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-  }
-
-  .result-emoji { font-size: 5rem; animation: bounce 2s ease-in-out infinite; margin-bottom: 16px; }
-
-  .result-category {
-    font-family: 'Bangers', cursive;
-    font-size: clamp(1.8rem, 6vw, 3rem);
-    letter-spacing: 3px;
-    margin-bottom: 8px;
-  }
-
-  .result-score {
-    font-size: 1.1rem;
-    color: var(--muted);
-    margin-bottom: 24px;
-  }
-
-  .result-score span { color: var(--text); font-weight: 800; font-size: 1.3rem; }
-
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .stat-box {
-    background: var(--card2);
+  .lb-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+  .lb-btn.secondary {
+    background: var(--card2); color: var(--text);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 10px;
-    text-align: center;
+  }
+  .lb-btn.secondary:hover { border-color: var(--accent1); }
+
+  /* config notice */
+  .config-notice {
+    background: rgba(255,75,110,0.1); border: 1px solid rgba(255,75,110,0.3);
+    border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;
+    font-size: 0.88rem; color: var(--red); line-height: 1.6;
+  }
+  .config-notice strong { color: #ff8fa0; }
+  .config-notice code {
+    background: rgba(255,255,255,0.08); border-radius: 6px;
+    padding: 2px 7px; font-size: 0.83rem; color: var(--accent3);
   }
 
-  .stat-val {
-    font-family: 'Bangers', cursive;
-    font-size: 1.8rem;
-    letter-spacing: 1px;
-    color: var(--purple2);
+  /* ── CHAR SELECT SCREEN ── */
+  #char-screen {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; padding: 40px 16px 60px;
+    position: relative; z-index: 1;
   }
-
-  .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-
-  .result-bar {
-    width: 100%;
-    height: 12px;
-    background: var(--card2);
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 16px 0 24px;
+  .char-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    background: linear-gradient(135deg, var(--accent3), var(--accent1), var(--accent4));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px rgba(75,255,213,0.4));
+    text-align: center; margin-bottom: 8px;
   }
-
-  .result-bar-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(90deg, var(--purple), var(--pink));
+  .char-sub { color: var(--muted); font-size: 0.95rem; text-align: center; margin-bottom: 32px; }
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px; width: 100%; max-width: 700px; margin-bottom: 32px;
   }
+  .char-card {
+    background: var(--card2); border: 2px solid var(--border);
+    border-radius: 16px; padding: 14px 10px 12px;
+    cursor: pointer; text-align: center;
+    transition: all 0.18s; user-select: none;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .char-card:hover { border-color: var(--accent1); background: rgba(200,75,255,0.1); transform: translateY(-3px); box-shadow: 0 6px 22px rgba(200,75,255,0.2); }
+  .char-card.selected { border-color: var(--accent3); background: rgba(75,255,213,0.12); box-shadow: 0 0 20px rgba(75,255,213,0.3); transform: translateY(-3px); }
+  .char-name { font-weight: 800; font-size: 0.82rem; color: var(--text); line-height: 1.3; letter-spacing: 0.2px; }
+  .char-confirm-btn {
+    background: linear-gradient(135deg, var(--accent3), var(--accent1));
+    border: none; border-radius: 50px; padding: 16px 52px;
+    color: #0d0a1a; font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 24px rgba(75,255,213,0.25);
+    opacity: 0.4; pointer-events: none;
+  }
+  .char-confirm-btn.active { opacity: 1; pointer-events: all; }
+  .char-confirm-btn.active:hover { opacity: 0.9; transform: translateY(-2px); }
+  .char-lb-link {
+    margin-top: 18px; background: none; border: 1px solid var(--border);
+    border-radius: 50px; padding: 10px 28px;
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .char-lb-link:hover { border-color: var(--accent4); color: var(--accent4); }
 
-  .btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-
-  /* ===== RANKING SCREEN ===== */
-  .ranking-title {
-    font-family: 'Bangers', cursive;
+  /* ── HEADER ── */
+  .header { text-align: center; padding: 40px 20px 30px; }
+  .header .circus-title {
+    font-family: 'Fredoka One', cursive;
     font-size: clamp(2rem, 6vw, 3.5rem);
-    letter-spacing: 3px;
-    text-align: center;
-    background: linear-gradient(135deg, var(--yellow), var(--pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent4));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(200,75,255,0.5)); line-height: 1.1;
   }
+  .header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
-  .ranking-sub { color: var(--muted); text-align: center; margin-bottom: 24px; font-size: 0.9rem; }
-
-  .ranking-table {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-
-  .ranking-header {
-    display: grid;
-    grid-template-columns: 50px 1fr 80px 80px 100px;
-    padding: 14px 20px;
-    background: var(--card2);
-    border-bottom: 1px solid var(--border);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-  }
-
-  .ranking-row {
-    display: grid;
-    grid-template-columns: 50px 1fr 80px 80px 100px;
-    padding: 14px 20px;
-    border-bottom: 1px solid rgba(124,58,237,0.1);
-    align-items: center;
-    transition: background 0.2s;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .ranking-row:last-child { border-bottom: none; }
-  .ranking-row:hover { background: rgba(168,85,247,0.05); }
-
-  .ranking-row.highlight {
-    background: rgba(168,85,247,0.1);
-    border-left: 3px solid var(--purple2);
-  }
-
-  .rank-pos {
-    font-family: 'Bangers', cursive;
-    font-size: 1.2rem;
+  /* ── TIMER ── */
+  .timer-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card2); border: 1px solid var(--accent4);
+    border-radius: 50px; padding: 7px 20px;
+    font-weight: 800; font-size: 1rem; margin-top: 10px;
+    color: var(--accent4); font-family: 'Fredoka One', cursive;
     letter-spacing: 1px;
   }
+  .timer-pill.urgent { border-color: var(--red); color: var(--red); animation: pulse 0.8s infinite; }
 
-  .rank-pos.gold { color: #fbbf24; }
-  .rank-pos.silver { color: #d1d5db; }
-  .rank-pos.bronze { color: #f97316; }
-  .rank-pos.normal { color: var(--muted); }
-
-  .rank-name { font-weight: 800; font-size: 0.95rem; }
-  .rank-score { font-family: 'Bangers', cursive; font-size: 1.2rem; color: var(--purple2); letter-spacing: 1px; text-align: center; }
-  .rank-time { font-size: 0.85rem; color: var(--muted); text-align: center; }
-  .rank-cat { font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 8px; text-align: center; }
-
-  .rank-cat.superFan { background: rgba(168,85,247,0.2); color: #d8b4fe; }
-  .rank-cat.sobresaliente { background: rgba(16,185,129,0.2); color: #6ee7b7; }
-  .rank-cat.promedio { background: rgba(251,191,36,0.2); color: #fde68a; }
-  .rank-cat.falso { background: rgba(239,68,68,0.2); color: #fca5a5; }
-
-  .loading-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
+  /* ── PLAYER BADGE ── */
+  .player-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card2); border: 1px solid var(--accent3);
+    border-radius: 50px; padding: 6px 18px;
+    font-weight: 800; font-size: 0.9rem; margin-top: 10px;
+    color: var(--accent3);
   }
 
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--purple2);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
+  /* ── SCOREBOARD ── */
+  .scoreboard { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+  .score-pill {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 50px; padding: 8px 20px;
+    font-weight: 700; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 7px;
   }
+  .score-pill span { font-size: 1.1rem; }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state { text-align: center; padding: 40px; color: var(--muted); }
-  .empty-state p { font-size: 1rem; }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    .ranking-header, .ranking-row {
-      grid-template-columns: 40px 1fr 60px 70px;
-    }
-    .ranking-header > *:nth-child(5),
-    .ranking-row > *:nth-child(5) { display: none; }
-    .ranking-header > *:nth-child(4),
-    .ranking-row > *:nth-child(4) { font-size: 0.75rem; }
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin: 36px 0 16px; padding: 14px 20px;
+    border-radius: 14px; font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem; letter-spacing: 0.5px;
   }
+  .section-header.easy      { background: linear-gradient(90deg, rgba(75,255,154,0.15), transparent); border-left: 4px solid var(--easy); }
+  .section-header.medium    { background: linear-gradient(90deg, rgba(255,233,75,0.15), transparent); border-left: 4px solid var(--medium); }
+  .section-header.hard      { background: linear-gradient(90deg, rgba(255,124,75,0.15), transparent); border-left: 4px solid var(--hard); }
+  .section-header.extreme   { background: linear-gradient(90deg, rgba(200,75,255,0.15), transparent); border-left: 4px solid var(--extreme); }
+  .section-header.ultra     { background: linear-gradient(90deg, rgba(255,75,160,0.15), transparent); border-left: 4px solid var(--ultra); }
+  .section-header.definitive{ background: linear-gradient(90deg, rgba(75,255,213,0.15), transparent); border-left: 4px solid var(--definitive); }
+  .dot-easy      { color: var(--easy); }
+  .dot-medium    { color: var(--medium); }
+  .dot-hard      { color: var(--hard); }
+  .dot-extreme   { color: var(--extreme); }
+  .dot-ultra     { color: var(--ultra); }
+  .dot-definitive{ color: var(--definitive); }
 
-  /* Confetti */
-  .confetti-piece {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    animation: confettiFall var(--d) ease-in var(--delay) forwards;
-    z-index: 999;
-    pointer-events: none;
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 22px 20px 18px;
+    margin-bottom: 14px; transition: border-color 0.3s;
   }
+  .q-card.answered-correct { border-color: var(--green); }
+  .q-card.answered-wrong   { border-color: var(--red); }
+  .q-number { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; opacity: 0.5; }
+  .q-text   { font-size: 1rem; font-weight: 700; line-height: 1.45; margin-bottom: 16px; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:480px){ .options-grid { grid-template-columns: 1fr; } }
+  .opt-btn {
+    background: var(--card2); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 10px 14px;
+    color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem; font-weight: 600; text-align: left;
+    cursor: pointer; transition: all 0.18s;
+    display: flex; align-items: center; gap: 8px; line-height: 1.3;
+  }
+  .opt-btn:hover:not(:disabled) { background: rgba(200,75,255,0.12); border-color: var(--accent1); transform: translateY(-1px); }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct  { background: rgba(75,255,154,0.15); border-color: var(--green); color: var(--green); }
+  .opt-btn.wrong    { background: rgba(255,75,110,0.12); border-color: var(--red); color: var(--red); opacity: 0.7; }
+  .opt-letter { min-width: 24px; height: 24px; background: rgba(255,255,255,0.07); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; }
+  .feedback { margin-top: 10px; padding: 9px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; display: none; }
+  .feedback.show { display: block; animation: fadeIn 0.25s ease; }
+  .feedback.ok  { background: rgba(75,255,154,0.12); color: var(--green); border: 1px solid rgba(75,255,154,0.3); }
+  .feedback.bad { background: rgba(255,75,110,0.1);  color: var(--red);   border: 1px solid rgba(255,75,110,0.3); }
 
-  @keyframes confettiFall {
-    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  /* ── OPEN ANSWER ── */
+  .open-row { display: flex; gap: 10px; margin-top: 4px; }
+  .open-input {
+    flex: 1; background: var(--card2); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 10px 16px;
+    color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    transition: border-color 0.2s; outline: none;
   }
+  .open-input:focus { border-color: var(--accent1); }
+  .open-input:disabled { opacity: 0.6; cursor: default; }
+  .open-input.correct { border-color: var(--green); background: rgba(75,255,154,0.07); }
+  .open-input.wrong   { border-color: var(--red);   background: rgba(255,75,110,0.07); }
+  .submit-btn {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border: none; border-radius: 12px; padding: 10px 20px;
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 0.9rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s; white-space: nowrap;
+  }
+  .submit-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.4; cursor: default; }
 
-  .error-msg {
-    background: rgba(239,68,68,0.15);
-    border: 1px solid rgba(239,68,68,0.3);
-    color: #fca5a5;
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin: 10px 0;
-    display: none;
+  /* ── RESULTS ── */
+  #results-screen { display: none; text-align: center; padding: 50px 20px; position: relative; z-index: 1; }
+  #results-screen.show { display: block; animation: fadeIn 0.4s ease; }
+  .result-emoji { font-size: 5rem; margin-bottom: 16px; }
+  .result-title {
+    font-family: 'Fredoka One', cursive; font-size: 2rem;
+    background: linear-gradient(135deg, var(--accent1), var(--accent4));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
   }
+  .result-score { font-size: 3.5rem; font-weight: 800; color: var(--text); }
+  .result-time  { font-size: 1.1rem; font-weight: 700; color: var(--accent4); margin-top: 6px; font-family: 'Fredoka One', cursive; }
+  .result-sub { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
+  .result-cheat-note { color: var(--red); font-weight: 700; font-size: 0.88rem; margin-top: 8px; display: none; }
+  .result-breakdown {
+    margin: 30px auto; max-width: 420px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .breakdown-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 18px;
+    font-weight: 700; font-size: 0.9rem;
+  }
+  .save-status {
+    margin: 16px auto; max-width: 420px;
+    padding: 12px 20px; border-radius: 12px;
+    font-weight: 700; font-size: 0.88rem; text-align: center;
+  }
+  .save-status.saving   { background: rgba(200,75,255,0.1); border: 1px solid rgba(200,75,255,0.3); color: var(--accent1); }
+  .save-status.saved    { background: rgba(75,255,154,0.1); border: 1px solid rgba(75,255,154,0.3); color: var(--green); }
+  .save-status.save-err { background: rgba(255,75,110,0.1); border: 1px solid rgba(255,75,110,0.3); color: var(--red); }
+  .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+  .restart-btn {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border: none; border-radius: 14px; padding: 14px 36px;
+    color: #fff; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .restart-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+  .view-lb-btn {
+    background: var(--card2); border: 1px solid var(--accent4);
+    border-radius: 14px; padding: 14px 36px;
+    color: var(--accent4); font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .view-lb-btn:hover { background: rgba(255,233,75,0.08); transform: translateY(-2px); }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { background: var(--card2); border-radius: 50px; height: 6px; margin-bottom: 30px; overflow: hidden; }
+  .progress-bar  { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 50px; transition: width 0.4s ease; }
+
+  /* ── FINISH ── */
+  .finish-area { text-align: center; margin: 40px 0 20px; }
+  .finish-btn {
+    background: linear-gradient(135deg, var(--accent3), var(--accent1));
+    border: none; border-radius: 50px; padding: 16px 48px;
+    color: #0d0a1a; font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 24px rgba(75,255,213,0.25);
+  }
+  .finish-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  /* ── CHEAT OVERLAY ── */
+  #cheat-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(13,10,26,0.97);
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px;
+  }
+  #cheat-overlay.active { display: flex; }
+  .cheat-icon { font-size: 5rem; margin-bottom: 20px; }
+  .cheat-title { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--red); margin-bottom: 12px; }
+  .cheat-msg { color: var(--muted); font-size: 1rem; max-width: 420px; line-height: 1.6; margin-bottom: 28px; }
+  .cheat-score { font-size: 2.5rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .cheat-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .cheat-btn {
+    background: linear-gradient(135deg, var(--red), #c8004b);
+    border: none; border-radius: 50px; padding: 14px 44px;
+    color: #fff; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .cheat-btn:hover { opacity: 0.85; }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse  { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
 </style>
 </head>
 <body>
 
-<div class="stars" id="stars"></div>
-
-<div class="container">
-
-  <!-- ===== WELCOME SCREEN ===== -->
-  <div class="screen active" id="screen-welcome">
-    <div class="logo-title">THE AMAZING<br>DIGITAL CIRCUS</div>
-    <div class="logo-sub">¿CUÁNTO SABES?</div>
-    <div class="circus-emoji">🎪</div>
-
-    <div class="welcome-card">
-      <p>40 preguntas para descubrir qué tan fan eres del Circo Digital. Responde rápido — ¡el tiempo también cuenta!</p>
-
-      <div class="categories-preview">
-        <div class="cat-badge false">0–10 · Fan Falso 😬</div>
-        <div class="cat-badge avg">11–25 · Fan Promedio 🙂</div>
-        <div class="cat-badge good">26–35 · Sobresaliente 🌟</div>
-        <div class="cat-badge super">36–40 · Super Fan 🎪</div>
-      </div>
-
-      <div class="input-group">
-        <label>Tu nombre o apodo</label>
-        <input type="text" id="player-name" placeholder="Ej: Pomni_Fan123" maxlength="30" autocomplete="off">
-      </div>
-
-      <div class="error-msg" id="name-error">¡Necesitas ingresar tu nombre para continuar!</div>
-
-      <button class="btn btn-primary" onclick="startGame()">
-        🎪 ¡ENTRAR AL CIRCO!
-      </button>
-      <br><br>
-      <button class="btn btn-secondary" onclick="showScreen('screen-ranking'); loadRanking()">
-        🏆 Ver Ranking TOP 40
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== QUIZ SCREEN ===== -->
-  <div class="screen" id="screen-quiz">
-    <div class="quiz-header">
-      <div class="q-counter" id="q-counter">1 / 40</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      <div class="timer-box" id="timer-box">⏱ <span id="timer-display">00:00</span></div>
-      <div class="score-live" id="score-live">✓ 0</div>
-    </div>
-
-    <div class="question-card" id="question-card">
-      <div class="question-level" id="q-level"></div>
-      <div class="question-type-badge" id="q-type-badge"></div>
-      <div class="question-text" id="q-text"></div>
-    </div>
-
-    <div id="answer-area" style="width:100%"></div>
-  </div>
-
-  <!-- ===== RESULT SCREEN ===== -->
-  <div class="screen" id="screen-result">
-    <div class="result-card">
-      <div class="result-emoji" id="result-emoji">🎪</div>
-      <div class="result-category" id="result-category"></div>
-      <div class="result-score" id="result-score"></div>
-
-      <div class="result-bar">
-        <div class="result-bar-fill" id="result-bar-fill" style="width:0%"></div>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-val" id="stat-score">0</div>
-          <div class="stat-label">Puntos</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val" id="stat-correct">0</div>
-          <div class="stat-label">Correctas</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val" id="stat-time">0:00</div>
-          <div class="stat-label">Tiempo</div>
-        </div>
-      </div>
-
-      <div class="error-msg" id="save-error"></div>
-
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="showScreen('screen-ranking'); loadRanking()">
-          🏆 Ver mi posición en el Ranking
-        </button>
-        <button class="btn btn-secondary" onclick="restartGame()">
-          🔄 Jugar de nuevo
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RANKING SCREEN ===== -->
-  <div class="screen" id="screen-ranking">
-    <div class="ranking-title">🏆 TOP 40</div>
-    <div class="ranking-sub">Los mayores fans del Circo Digital</div>
-
-    <div class="ranking-table">
-      <div class="ranking-header">
-        <div>#</div>
-        <div>Jugador</div>
-        <div style="text-align:center">Pts</div>
-        <div style="text-align:center">Tiempo</div>
-        <div style="text-align:center">Categoría</div>
-      </div>
-      <div id="ranking-body">
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Cargando el ranking...</p>
-        </div>
-      </div>
-    </div>
-
-    <button class="btn btn-secondary" style="max-width:300px" onclick="showScreen('screen-welcome')">
-      ← Volver al inicio
-    </button>
-  </div>
-
-</div>
-
+<!-- ═══════════════ SUPABASE CONFIG ═══════════════ -->
 <script>
-// ===== CONFIG SUPABASE =====
-const SUPABASE_URL = 'https://goopxqkxuogqhlppsfyv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_P1uFKhOCi6Yr9ie0mokF9A_uxTJk2Bf';
+  // ⚠️ REEMPLAZA ESTOS VALORES CON LOS TUYOS DE SUPABASE
+  const SUPABASE_URL = 'https://TU_PROJECT_ID.supabase.co';
+  const SUPABASE_KEY = 'TU_ANON_PUBLIC_KEY';
+  const TABLE_NAME   = 'tadc_leaderboard';
 
-// ===== PREGUNTAS =====
-const questions = [
-  // NIVEL 1 - Básico
-  { q: "¿Cómo se llama la protagonista principal?", type: "mc", options: ["Ragatha","Pomni","Bubble","Kinger"], answer: 1, level: "Nivel 1 — Básico" },
-  { q: "¿Qué tipo de gorro usa Pomni?", type: "mc", options: ["Sombrero de mago","Corona","Gorro de bufón","Gorra de béisbol"], answer: 2, level: "Nivel 1 — Básico" },
-  { q: "¿Quién es el maestro de ceremonia del circo digital?", type: "mc", options: ["Jax","Kinger","Caine","Gangle"], answer: 2, level: "Nivel 1 — Básico" },
-  { q: "¿De qué color es el traje de Jax?", type: "mc", options: ["Rojo","Azul","Verde","Morado"], answer: 0, level: "Nivel 1 — Básico" },
-  { q: "¿Qué tipo de personaje es Ragatha?", type: "mc", options: ["Robot","Muñeca de trapo","Payaso","Marioneta"], answer: 1, level: "Nivel 1 — Básico" },
-  { q: "¿El mundo del circo es real o virtual?", type: "tf", options: ["Real","Virtual"], answer: 1, level: "Nivel 1 — Básico" },
-  { q: "¿Qué personaje tiene una actitud traviesa y dientes grandes?", type: "mc", options: ["Caine","Ragatha","Jax","Kinger"], answer: 2, level: "Nivel 1 — Básico" },
-  { q: "¿Pomni llega al circo por accidente o por decisión propia?", type: "tf", options: ["Por decisión propia","Por accidente"], answer: 1, level: "Nivel 1 — Básico" },
-  { q: "¿Qué emoción muestra Pomni al inicio de la serie?", type: "mc", options: ["Alegría","Ira","Miedo y ansiedad","Aburrimiento"], answer: 2, level: "Nivel 1 — Básico" },
-  { q: "¿El circo digital es ordenado o caótico?", type: "tf", options: ["Ordenado","Caótico"], answer: 1, level: "Nivel 1 — Básico" },
-
-  // NIVEL 2 - Intermedio
-  { q: "¿Cómo describirías la personalidad de Caine?", type: "mc", options: ["Seria y formal","Excéntrica y caótica","Tímida y tranquila","Malvada y cruel"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué es lo que más teme Pomni dentro del circo?", type: "mc", options: ["Los monstruos","Las aventuras","Quedarse atrapada para siempre","La oscuridad"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué estilo visual tiene el mundo digital?", type: "mc", options: ["Realista y oscuro","Colorido y absurdo","Minimalista y blanco","Medieval y misterioso"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Cómo reaccionan los demás personajes ante la llegada de Pomni?", type: "mc", options: ["Con hostilidad","Con indiferencia","Con curiosidad","Con miedo"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué actitud caracteriza principalmente a Jax?", type: "mc", options: ["Amable y empático","Miedoso y ansioso","Sarcástica y burlona","Líder y protector"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿La serie mezcla comedia con qué otro género?", type: "mc", options: ["Romance","Terror psicológico","Ciencia ficción","Aventura épica"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Cómo se llama el proceso cuando un personaje pierde la cordura en el circo?", type: "mc", options: ["Digitalización","Fragmentación","Abstracción","Corrupción"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué tipo de humor usa principalmente la serie?", type: "mc", options: ["Humor negro","Humor absurdo","Humor romántico","Slapstick puro"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Quién acompaña a Caine como ayudante en el circo?", type: "mc", options: ["Jax","Ragatha","Bubble","Kinger"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿Los personajes del circo hablan de manera normal?", type: "tf", options: ["Sí, normalmente","No, con efectos extraños"], answer: 0, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué hace que el circo sea perturbador a pesar de su apariencia alegre?", type: "mc", options: ["La música oscura","Lo feliz pero perturbador al mismo tiempo","Los villanos evidentes","El diseño tenebroso"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Los personajes recuerdan bien su pasado antes de llegar al circo?", type: "tf", options: ["Sí, perfectamente","No, tienen recuerdos borrosos"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿La serie está hecha en 2D o en 3D?", type: "tf", options: ["2D","3D"], answer: 1, level: "Nivel 2 — Intermedio" },
-  { q: "¿Qué emoción NO falta en el primer episodio de la serie?", type: "mc", options: ["Nostalgia","Euforia","Ansiedad","Romanticismo"], answer: 2, level: "Nivel 2 — Intermedio" },
-  { q: "¿Las reglas del mundo digital son estables o cambian constantemente?", type: "tf", options: ["Son estables","Cambian constantemente"], answer: 1, level: "Nivel 2 — Intermedio" },
-
-  // NIVEL 3 - Avanzado
-  { q: "¿Qué hace Caine constantemente para mantener a los personajes ocupados?", type: "mc", options: ["Les da trabajos reales","Crear aventuras y actividades forzadas","Les enseña sobre el circo","Los deja libres"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué le puede pasar a un personaje que no participa correctamente en las actividades del circo?", type: "mc", options: ["Es expulsado del circo","Pierde sus colores","Puede perder su estabilidad mental","Se convierte en NPC"], answer: 2, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué característica tiene el entorno cuando algo no está bien en el sistema del circo?", type: "mc", options: ["Todo se vuelve blanco","Se vuelve extraño, incompleto o glitchy","Los personajes desaparecen","La música se detiene"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Cómo es el comportamiento de Jax frente a situaciones de peligro?", type: "mc", options: ["Entra en pánico","Busca ayuda inmediatamente","Relajado y burlón","Se vuelve heroico"], answer: 2, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué elemento del mundo digital muestra que no sigue reglas físicas normales?", type: "mc", options: ["Los personajes no comen","Cambios ilógicos de espacio y entorno","Los colores son monocromáticos","No hay gravedad"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué sucede cuando Pomni insiste demasiado en intentar escapar del circo?", type: "mc", options: ["Encuentra una salida","Caine la castiga","Se altera emocionalmente","Los demás la ignoran"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué indica que los personajes llevan mucho tiempo atrapados en el circo?", type: "mc", options: ["Sus trajes están desgastados","Su actitud resignada ante la situación","Hablan de años pasados","Sus recuerdos son perfectos"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Cómo trata Caine los problemas emocionales de los personajes?", type: "mc", options: ["Los ayuda genuinamente","Los ignora o los cubre con entretenimiento","Los envía a terapia","Les da respuestas honestas"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué tipo de lugares aparecen cuando los personajes exploran fuera del escenario principal?", type: "mc", options: ["Mundos paralelos completos","Espacios vacíos o sin terminar","Zonas llenas de enemigos","Recuerdos del pasado real"], answer: 1, level: "Nivel 3 — Avanzado" },
-  { q: "¿Qué efecto tiene el entorno del circo en la mente de Pomni?", type: "mc", options: ["La hace más fuerte","La relaja y distrae","La desestabiliza y estresa más","No le afecta"], answer: 1, level: "Nivel 3 — Avanzado" },
-
-  // NIVEL 4 - Experto
-  { q: "¿Qué intenta hacer Pomni desesperadamente cuando llega al mundo digital?", type: "mc", options: ["Hacer amigos rápidamente","Unirse a una aventura","Buscar una salida o puerta de escape","Aprender las reglas del circo"], answer: 2, level: "Nivel 4 — Experto" },
-  { q: "¿Qué le dice Caine a Pomni cuando ella pregunta por cómo salir del circo?", type: "mc", options: ["Le explica el proceso de salida","Que no hay salida o evita dar una respuesta clara","Le promete que la ayudará","Le dice que pregunte a Ragatha"], answer: 1, level: "Nivel 4 — Experto" },
-  { q: "¿Qué encuentra Pomni cuando explora lugares fuera del recorrido normal del circo?", type: "mc", options: ["Personajes secretos","Zonas vacías, extrañas o espacios incompletos","La salida real del circo","Recuerdos de otros personajes"], answer: 1, level: "Nivel 4 — Experto" },
-  { q: "¿Qué reacción tienen los otros personajes cuando Pomni entra en pánico?", type: "mc", options: ["Se asustan también","La ignoran completamente","Intentan calmarla, ya acostumbrados a eso","Llaman a Caine de inmediato"], answer: 2, level: "Nivel 4 — Experto" },
-  { q: "¿Qué situación provoca el momento más tenso del episodio piloto?", type: "mc", options: ["Una aventura peligrosa de Caine","Un ataque de un personaje abstracto","La crisis emocional de Pomni al darse cuenta que no puede escapar","La desaparición de un personaje"], answer: 2, level: "Nivel 4 — Experto" },
-];
-
-// ===== ESTADO DEL JUEGO =====
-let currentQ = 0;
-let score = 0;
-let correctCount = 0;
-let playerName = '';
-let totalSeconds = 0;
-let timerInterval = null;
-let answered = false;
-let currentHighlightName = '';
-
-// ===== ESTRELLAS =====
-function createStars() {
-  const container = document.getElementById('stars');
-  for (let i = 0; i < 80; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s`;
-    container.appendChild(s);
-  }
-}
-
-// ===== NAVEGACIÓN =====
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-// ===== INICIAR JUEGO =====
-function startGame() {
-  const nameInput = document.getElementById('player-name');
-  const err = document.getElementById('name-error');
-  playerName = nameInput.value.trim();
-
-  if (!playerName) {
-    err.style.display = 'block';
-    nameInput.focus();
-    return;
-  }
-  err.style.display = 'none';
-
-  currentQ = 0;
-  score = 0;
-  correctCount = 0;
-  totalSeconds = 0;
-  answered = false;
-
-  startTimer();
-  showScreen('screen-quiz');
-  renderQuestion();
-}
-
-// ===== TEMPORIZADOR =====
-function startTimer() {
-  clearInterval(timerInterval);
-  totalSeconds = 0;
-  updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    totalSeconds++;
-    updateTimerDisplay();
-  }, 1000);
-}
-
-function stopTimer() { clearInterval(timerInterval); }
-
-function updateTimerDisplay() {
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  document.getElementById('timer-display').textContent =
-    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  const box = document.getElementById('timer-box');
-  box.className = 'timer-box';
-  if (totalSeconds > 600) box.classList.add('danger');
-  else if (totalSeconds > 420) box.classList.add('warning');
-}
-
-function formatTime(secs) {
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-
-// ===== RENDERIZAR PREGUNTA =====
-function renderQuestion() {
-  if (currentQ >= questions.length) { endGame(); return; }
-
-  answered = false;
-  const q = questions[currentQ];
-
-  document.getElementById('q-counter').textContent = `${currentQ+1} / ${questions.length}`;
-  document.getElementById('progress-fill').style.width = `${(currentQ/questions.length)*100}%`;
-  document.getElementById('score-live').textContent = `✓ ${correctCount}`;
-  document.getElementById('q-level').textContent = q.level;
-  document.getElementById('q-text').textContent = q.q;
-
-  const typeBadge = document.getElementById('q-type-badge');
-  if (q.type === 'mc') { typeBadge.textContent = '🔵 Opción múltiple'; typeBadge.className = 'question-type-badge type-mc'; }
-  else if (q.type === 'tf') { typeBadge.textContent = '🟡 Verdadero / Falso'; typeBadge.className = 'question-type-badge type-tf'; }
-  else { typeBadge.textContent = '🟢 Respuesta abierta'; typeBadge.className = 'question-type-badge type-open'; }
-
-  const area = document.getElementById('answer-area');
-  area.innerHTML = '';
-
-  if (q.type === 'mc') renderMC(q, area);
-  else if (q.type === 'tf') renderTF(q, area);
-  else renderOpen(q, area);
-}
-
-function renderMC(q, area) {
-  const letters = ['A','B','C','D'];
-  const grid = document.createElement('div');
-  grid.className = 'options-grid';
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
-    btn.onclick = () => selectMC(i, q, grid);
-    grid.appendChild(btn);
-  });
-  area.appendChild(grid);
-}
-
-function selectMC(idx, q, grid) {
-  if (answered) return;
-  answered = true;
-  const btns = grid.querySelectorAll('.option-btn');
-  btns.forEach(b => b.disabled = true);
-
-  const isCorrect = idx === q.answer;
-  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-
-  if (isCorrect) { score++; correctCount++; }
-
-  setTimeout(() => nextQuestion(), 1200);
-}
-
-function renderTF(q, area) {
-  const grid = document.createElement('div');
-  grid.className = 'tf-grid';
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = `tf-btn ${i === 0 ? 'verdadero' : 'falso'}`;
-    btn.textContent = opt;
-    btn.onclick = () => selectTF(i, q, grid);
-    grid.appendChild(btn);
-  });
-  area.appendChild(grid);
-}
-
-function selectTF(idx, q, grid) {
-  if (answered) return;
-  answered = true;
-  const btns = grid.querySelectorAll('.tf-btn');
-  btns.forEach(b => b.disabled = true);
-
-  const isCorrect = idx === q.answer;
-  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-
-  if (isCorrect) { score++; correctCount++; }
-
-  setTimeout(() => nextQuestion(), 1200);
-}
-
-function renderOpen(q, area) {
-  const wrap = document.createElement('div');
-  wrap.className = 'open-answer-area';
-  wrap.innerHTML = `
-    <textarea id="open-input" placeholder="Escribe tu respuesta aquí..."></textarea>
-    <div class="answer-feedback" id="open-feedback"></div>
-    <div class="next-btn-area">
-      <button class="btn btn-primary" id="submit-open" onclick="submitOpen()">✓ Confirmar respuesta</button>
-    </div>
-  `;
-  area.appendChild(wrap);
-
-  const ta = document.getElementById('open-input');
-  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitOpen(); } });
-}
-
-function submitOpen() {
-  if (answered) return;
-  const q = questions[currentQ];
-  const input = document.getElementById('open-input').value.trim().toLowerCase();
-  const fb = document.getElementById('open-feedback');
-  const btn = document.getElementById('submit-open');
-
-  if (!input) return;
-
-  answered = true;
-  btn.disabled = true;
-  document.getElementById('open-input').disabled = true;
-
-  const correct = checkOpenAnswer(input, q);
-
-  fb.style.display = 'block';
-  if (correct === 'correct') {
-    fb.className = 'answer-feedback correct';
-    fb.textContent = `✓ ¡Correcto!`;
-    score++; correctCount++;
-  } else if (correct === 'partial') {
-    fb.className = 'answer-feedback partial';
-    fb.textContent = `⚡ ¡Muy cerca! Cuenta como correcto.`;
-    score++; correctCount++;
-  } else {
-    fb.className = 'answer-feedback wrong';
-    fb.textContent = `✗ Respuesta incorrecta.`;
-  }
-
-  setTimeout(() => nextQuestion(), 1800);
-}
-
-function checkOpenAnswer(input, q) {
-  const correct = q.options[q.answer].toLowerCase();
-  const exceptions = q.exceptions || [];
-
-  if (input === correct) return 'correct';
-  if (correct.includes(input) || input.includes(correct)) return 'correct';
-
-  // Excepciones por pregunta
-  const partialMatches = {
-    'miedo y ansiedad': ['miedo','ansiedad','angustia','panico','pánico','susto'],
-    'colorido y absurdo': ['colorido','absurdo','vistoso','brillante'],
-    'excéntrica y caótica': ['excentrica','excéntrica','caotica','caótica','loca','rara'],
-    'quedarse atrapada para siempre': ['atrapada','encerrada','no salir','sin salida'],
-    'terror psicológico': ['terror','psicologico','psicológico','horror','miedo'],
-    'humor absurdo': ['absurdo','absurda'],
-    'relajado y burlón': ['relajado','burlon','burlón','tranquilo'],
-    'actitud resignada ante la situación': ['resignada','resignacion','resignación','acostumbrados'],
-    'la desestabiliza y estresa más': ['desestabiliza','estresa','altera','perturba'],
-    'zonas vacías, extrañas o espacios incompletos': ['vacias','vacías','extrañas','incompletos','vacio','vacío'],
-    'buscar una salida o puerta de escape': ['salida','escapar','escape','puerta'],
-    'intentan calmarla, ya acostumbrados a eso': ['calmarla','calmar','tranquilizarla','acostumbrados'],
-    'la crisis emocional de pomni al darse cuenta que no puede escapar': ['crisis','emocional','pomni','escapar','no puede'],
-  };
-
-  for (const [key, synonyms] of Object.entries(partialMatches)) {
-    if (correct.includes(key) || key.includes(correct)) {
-      for (const syn of synonyms) {
-        if (input.includes(syn)) return 'partial';
-      }
-    }
-  }
-
-  for (const syn of synonyms_general(correct)) {
-    if (input.includes(syn) || syn.includes(input)) return 'partial';
-  }
-
-  return 'wrong';
-}
-
-function synonyms_general(correct) {
-  const maps = {
-    'pomni': ['pomni'],
-    'gorro de bufón': ['bufon','bufón','gorro'],
-    'caine': ['caine'],
-    'morado': ['violeta','purpura','púrpura'],
-    'muñeca de trapo': ['trapo','muñeca'],
-    'virtual': ['digital','simulado'],
-    'jax': ['jax'],
-    'accidente': ['accidental','sin querer'],
-    'caótico': ['caotico','desordenado'],
-    'bubble': ['bubble','burbuja'],
-    'abstracción': ['abstraccion','abstracto'],
-    '3d': ['tres dimensiones','tridimensional'],
-  };
-  return maps[correct] || [];
-}
-
-// ===== SIGUIENTE PREGUNTA =====
-function nextQuestion() {
-  currentQ++;
-  if (currentQ >= questions.length) { endGame(); return; }
-  renderQuestion();
-}
-
-// ===== FIN DEL JUEGO =====
-async function endGame() {
-  stopTimer();
-
-  const pct = (score / questions.length) * 100;
-  let category, emoji, color;
-
-  if (score <= 10) { category = 'Fan Falso'; emoji = '😬'; color = '#ef4444'; }
-  else if (score <= 25) { category = 'Fan Promedio'; emoji = '🙂'; color = '#fbbf24'; }
-  else if (score <= 35) { category = 'Fan Sobresaliente'; emoji = '🌟'; color = '#10b981'; }
-  else { category = 'Super Fan'; emoji = '🎪'; color = '#a855f7'; launchConfetti(); }
-
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-category').textContent = category;
-  document.getElementById('result-category').style.color = color;
-  document.getElementById('result-score').innerHTML = `Obtuviste <span>${score}</span> de 40 puntos`;
-  document.getElementById('stat-score').textContent = score;
-  document.getElementById('stat-correct').textContent = `${correctCount}/40`;
-  document.getElementById('stat-time').textContent = formatTime(totalSeconds);
-
-  showScreen('screen-result');
-
-  setTimeout(() => {
-    document.getElementById('result-bar-fill').style.width = `${pct}%`;
-  }, 300);
-
-  await saveResult(category);
-}
-
-// ===== GUARDAR RESULTADO =====
-async function saveResult(category) {
-  const err = document.getElementById('save-error');
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Ranking`, {
+  async function sbInsert(row) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'return=minimal'
+        'Prefer': 'return=representation'
       },
-      body: JSON.stringify({
-        nombre: playerName,
-        puntaje: score,
-        tiempo_seg: totalSeconds,
-        categoria: category
-      })
+      body: JSON.stringify(row)
     });
-
-    if (!res.ok) {
-      const errData = await res.text();
-      console.error('Error guardando:', errData);
-      err.textContent = '⚠️ No se pudo guardar el resultado. Verifica la conexión.';
-      err.style.display = 'block';
-    }
-  } catch(e) {
-    console.error(e);
-    err.textContent = '⚠️ Error de conexión con la base de datos.';
-    err.style.display = 'block';
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
   }
-}
 
-// ===== CARGAR RANKING =====
-async function loadRanking() {
-  const body = document.getElementById('ranking-body');
-  body.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Cargando ranking...</p></div>';
-
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/Ranking?select=*&order=puntaje.desc,tiempo_seg.asc,created_at.asc&limit=40`,
+  async function sbSelect() {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*&order=score.desc,time_seconds.asc,created_at.asc&limit=50`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -1227,85 +427,684 @@ async function loadRanking() {
         }
       }
     );
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
 
-    if (!res.ok) throw new Error('Error al cargar');
-    const data = await res.json();
+  function isConfigured() {
+    return SUPABASE_URL !== 'https://TU_PROJECT_ID.supabase.co' &&
+           SUPABASE_KEY !== 'TU_ANON_PUBLIC_KEY';
+  }
+</script>
 
-    if (!data.length) {
-      body.innerHTML = '<div class="empty-state"><p>🎪 ¡Sé el primero en el ranking!</p></div>';
+<!-- ═══════════════ CHEAT OVERLAY ═══════════════ -->
+<div id="cheat-overlay">
+  <div class="cheat-icon">🚨</div>
+  <div class="cheat-title">¡Trampa detectada!</div>
+  <div class="cheat-msg">Saliste de la encuesta. El quiz fue cerrado automáticamente y las preguntas no respondidas cuentan como incorrectas.</div>
+  <div class="cheat-score" id="cheat-score-display">0/52</div>
+  <div class="cheat-sub" id="cheat-score-sub"></div>
+  <button class="cheat-btn" onclick="resetToChar()">Empezar de nuevo</button>
+</div>
+
+<!-- ═══════════════ LEADERBOARD SCREEN ═══════════════ -->
+<div id="leaderboard-screen">
+  <div class="lb-title">Tabla de Campeones</div>
+  <div class="lb-sub">Los mejores jugadores del Circo Digital · Ordenado por puntos, luego por tiempo</div>
+  <div id="lb-config-notice" style="display:none;">
+    <div class="config-notice">
+      <strong>Supabase no configurado.</strong> Para activar la tabla, edita el archivo y reemplaza
+      <code>SUPABASE_URL</code> y <code>SUPABASE_KEY</code> con tus credenciales reales.
+    </div>
+  </div>
+  <div id="lb-content"><div class="lb-loading">Cargando campeones...</div></div>
+  <div class="lb-actions">
+    <button class="lb-btn" onclick="showCharScreen()">Jugar</button>
+    <button class="lb-btn secondary" onclick="loadLeaderboard()">Actualizar</button>
+  </div>
+</div>
+
+<!-- ═══════════════ CHARACTER SELECT ═══════════════ -->
+<div id="char-screen">
+  <div style="text-align:center;margin-bottom:6px;"><span style="font-size:3rem;">🎪</span></div>
+  <div class="char-title">Elige tu personaje</div>
+  <div class="char-sub">Selecciona con quién vas a jugar el Quiz del Circo Digital</div>
+  <div class="char-grid" id="char-grid"></div>
+  <button class="char-confirm-btn" id="char-confirm-btn" onclick="startQuiz()">Entrar al circo</button>
+  <button class="char-lb-link" onclick="showLeaderboard()">Ver tabla de campeones</button>
+</div>
+
+<!-- ═══════════════ QUIZ SCREEN ═══════════════ -->
+<div id="quiz-screen" style="display:none;">
+  <div class="wrapper">
+    <div class="header">
+      <div class="circus-title">El Circo Digital</div>
+      <div class="circus-title" style="font-size:clamp(1rem,3vw,1.6rem);margin-top:4px;">Quiz Definitivo</div>
+      <p>52 preguntas · 6 niveles · ¿Cuánto sabes del circo?</p>
+      <div class="player-badge" id="player-badge-display">Jugador</div>
+      <div class="timer-pill" id="timer-display">00:00</div>
+    </div>
+    <div class="scoreboard">
+      <div class="score-pill"><span>✅</span> Correctas: <strong id="sc-correct">0</strong></div>
+      <div class="score-pill"><span>❌</span> Falladas: <strong id="sc-wrong">0</strong></div>
+      <div class="score-pill"><span>🎯</span> Respondidas: <strong id="sc-done">0</strong>/52</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+    <div id="questions-container"></div>
+    <div class="finish-area">
+      <button class="finish-btn" onclick="showResults(false)">Ver mis resultados</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RESULTS SCREEN ═══════════════ -->
+<div id="results-screen" style="display:none;">
+  <div class="wrapper">
+    <div class="result-emoji" id="res-emoji">🎪</div>
+    <div class="result-title" id="res-title">Resultado</div>
+    <div style="font-size:1rem;color:var(--accent3);font-weight:700;margin-bottom:4px;" id="res-player-name"></div>
+    <div class="result-score" id="res-score">0/52</div>
+    <div class="result-time" id="res-time"></div>
+    <div class="result-sub" id="res-sub"></div>
+    <div class="result-cheat-note" id="res-cheat-note">Quiz cerrado por salir de la página. Preguntas sin responder marcadas como incorrectas.</div>
+    <div class="save-status" id="save-status" style="display:none;"></div>
+    <div class="result-breakdown" id="res-breakdown"></div>
+    <div class="result-actions">
+      <button class="view-lb-btn" onclick="showLeaderboard()">Ver tabla</button>
+      <button class="restart-btn" onclick="resetToChar()">Jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  PERSONAJES — solo nombres, sin emojis
+// ═══════════════════════════════════════════
+const characters = [
+  { name: "Abel" },
+  { name: "Bubble" },
+  { name: "Bubble Evil" },
+  { name: "Caine" },
+  { name: "Gangle" },
+  { name: "Jax Evil" },
+  { name: "Jax Fight Club" },
+  { name: "Kinger" },
+  { name: "Ming" },
+  { name: "Npc" },
+  { name: "Pomni" },
+  { name: "Pomni Fight Club" },
+  { name: "Pomni Ringmaster" },
+  { name: "Pomni Skating" },
+  { name: "Queenie" },
+  { name: "Ragatha" },
+  { name: "Ragatha Skating" },
+  { name: "Ribbit" },
+  { name: "Zooble" },
+  { name: "Zooble Masculino" },
+  { name: "Zooble Skating" },
+];
+
+let selectedChar = null;
+let quizActive   = false;
+let cheated      = false;
+
+// ── Timer ──
+let timerInterval = null;
+let timerSeconds  = 0;
+
+function startTimer() {
+  timerSeconds = 0;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+  const s = String(timerSeconds % 60).padStart(2, '0');
+  const el = document.getElementById('timer-display');
+  if (!el) return;
+  el.textContent = `${m}:${s}`;
+  if (timerSeconds >= 3600) {
+    el.classList.add('urgent');
+  } else {
+    el.classList.remove('urgent');
+  }
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}s`;
+  return `${m}m ${s}s`;
+}
+
+// ═══════════════════════════════════════════
+//  BUILD CHARACTER GRID
+// ═══════════════════════════════════════════
+function buildCharGrid() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = '';
+  characters.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    card.dataset.idx = i;
+    card.innerHTML = `<div class="char-name">${c.name}</div>`;
+    card.addEventListener('click', () => selectChar(i));
+    grid.appendChild(card);
+  });
+}
+
+function selectChar(idx) {
+  selectedChar = idx;
+  document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.char-card[data-idx="${idx}"]`).classList.add('selected');
+  const btn = document.getElementById('char-confirm-btn');
+  btn.classList.add('active');
+  btn.textContent = `Entrar como ${characters[idx].name}`;
+}
+
+// ═══════════════════════════════════════════
+//  BANCO DE PREGUNTAS
+// ═══════════════════════════════════════════
+const sections = [
+  {
+    id:"easy", label:"FACIL — Nivel 1", cls:"easy", dot:"dot-easy",
+    questions:[
+      {id:1,text:"¿Cómo se llama la protagonista principal?",opts:["Ragatha","Gangle","Pomni","Zooble","Bubble","Kaufmo"],ans:2},
+      {id:2,text:"¿Quién es el maestro de ceremonias?",opts:["Jax","Kinger","Ragatha","Caine","Bubble","Zooble"],ans:3},
+      {id:3,text:"¿Qué accesorio lleva Pomni en la cabeza?",opts:["Sombrero de mago","Corona de colores","Casco de payaso","Gorra de béisbol","Gorro de bufón","Tiara brillante"],ans:4},
+      {id:4,text:"¿De qué color es principalmente el traje de Pomni?",opts:["Rosa y blanco","Morado y negro","Verde y amarillo","Rojo y dorado","Azul y blanco","Celeste y gris"],ans:4},
+      {id:5,text:"¿Jax es un…?",opts:["Gato","Perro","Zorro","Oso","Lobo","Conejo"],ans:5},
+      {id:6,text:"¿Ragatha es una muñeca de trapo?",opts:["Verdadero","Falso"],ans:0,tf:true},
+      {id:7,text:"¿El Circo Digital existe en el mundo real?",opts:["Verdadero","Falso"],ans:1,tf:true},
+      {id:8,text:"¿Cómo se llama el personaje que flota como burbuja?",opts:["Glitch","Orbie","Float","Sphera","Blob","Bubble"],ans:5},
+      {id:9,text:"¿Pomni llega al circo feliz y emocionada?",opts:["Verdadero","Falso"],ans:1,tf:true},
+      {id:10,text:"¿De qué color son las orejas de Jax?",opts:["Rojas","Negras","Azules","Verdes","Moradas","Blancas"],ans:4},
+    ]
+  },
+  {
+    id:"medium", label:"INTERMEDIO — Nivel 2", cls:"medium", dot:"dot-medium",
+    questions:[
+      {id:11,text:"¿Cómo se llama el proceso cuando un personaje pierde la cordura?",opts:["Fragmentación","Digitalización","Corrupción","Disociación","Colapso mental","Abstracción"],ans:5},
+      {id:12,text:"¿Qué personaje tiene parches de corazones?",opts:["Gangle","Pomni","Zooble","Bubble","Ragatha","Kinger"],ans:4},
+      {id:13,text:"¿Kinger es el más estable mentalmente?",opts:["Verdadero","Falso"],ans:1,tf:true},
+      {id:14,text:"¿Qué forma tiene la cabeza de Kinger?",opts:["Cuadrada","Circular","Triangular","De dado","De corona","De rey de ajedrez"],ans:5},
+      {id:15,text:"¿De qué material es la máscara de Gangle?",opts:["Metal","Madera","Cristal","Porcelana","Plástico","Tela endurecida"],ans:3},
+      {id:16,text:"¿Cuántos personajes principales hay al inicio?",opts:["4","5","7","8","6","9"],ans:4},
+      {id:17,text:"¿Zooble puede cambiar la forma de su cuerpo?",opts:["Verdadero","Falso"],ans:0,tf:true},
+      {id:18,text:"¿Qué personaje se abstrae en el episodio piloto?",opts:["Kinger","Gangle","Zooble","Jax","Ragatha","Kaufmo"],ans:5},
+      {id:19,text:"¿Qué color predomina en el diseño del circo?",opts:["Oscuro y negro","Pastel y suave","Rojo y dorado","Blanco y plateado","Gris y azul","Colores vivos y saturados"],ans:5},
+      {id:20,text:"¿Caine puede modificar el entorno del circo?",opts:["Verdadero","Falso"],ans:0,tf:true},
+    ]
+  },
+  {
+    id:"hard", label:"DIFICIL — Nivel 3", cls:"hard", dot:"dot-hard",
+    questions:[
+      {id:21,text:"¿Cómo se llama el personaje abstracto del piloto?",opts:["Kaufmo","Koufmo","Darkmo","Glitchmo","Void","Chaosmo"],ans:0},
+      {id:22,text:"¿Qué emoción muestra Ragatha hacia Pomni al llegar?",opts:["Entusiasmo y alegría","Ternura protectora","Empatía y amabilidad","Cariño maternal","Curiosidad amistosa","Indiferencia fría"],ans:2},
+      {id:23,text:"¿Qué ocurre al entorno cuando hay un error del sistema?",opts:["Los personajes pierden sus colores progresivamente","Aparecen sombras y el escenario se oscurece","El tiempo dentro del circo se detiene por completo","Se vuelve glitchy e incompleto","Los personajes quedan suspendidos en el aire","Las paredes del circo empiezan a desaparecer"],ans:3},
+      {id:24,text:"¿Por qué Kinger se comporta de forma errática?",opts:["Es su personalidad de origen","Tuvo una mala experiencia en una aventura","Fue afectado por una abstracción parcial","Perdió a su mejor amigo en el circo","Tiene un defecto en su código digital","Lleva más tiempo que nadie atrapado en el circo"],ans:5},
+      {id:25,text:"¿Qué dos emociones representan las máscaras de Gangle?",opts:["Ira y calma","Miedo y valentía","Amor y odio","Sorpresa y aburrimiento","Vergüenza y orgullo","Tristeza y felicidad"],ans:5},
+      {id:26,text:"¿Qué actitud tiene Jax ante el peligro real?",opts:["Se vuelve el líder del grupo","Entra en pánico silencioso","Huye sin avisar a nadie","Busca proteger a Pomni","Pide ayuda a Caine inmediatamente","Sigue siendo burlón e indiferente"],ans:5},
+      {id:27,text:"¿Hay zonas sin terminar fuera del escenario principal?",opts:["Verdadero","Falso"],ans:0,tf:true},
+      {id:28,text:"¿Qué intenta Pomni antes de unirse a la aventura?",opts:["Conocer a todos los personajes","Hablar con Caine sobre las reglas","Explorar el escenario principal","Entender el funcionamiento del circo","Hacer amistad con Ragatha","Encontrar una salida del circo"],ans:5},
+      {id:29,text:"¿Cómo reacciona Caine cuando Pomni pregunta cómo salir?",opts:["Le explica que es imposible salir","Se molesta y la ignora","Le promete buscar una solución","Le dice que pregunte a Ragatha","Se pone triste y cambia el tema","Evita la pregunta y la redirige a la aventura"],ans:5},
+      {id:30,text:"¿Qué hace único a Zooble frente a los demás?",opts:["Es el único que recuerda su vida pasada","Puede salir brevemente del circo","No participa en ninguna aventura","Tiene acceso a zonas prohibidas","Habla directamente con el sistema del circo","Su cuerpo está hecho de partes intercambiables"],ans:5},
+    ]
+  },
+  {
+    id:"extreme", label:"MUY DIFICIL — Nivel 4", cls:"extreme", dot:"dot-extreme",
+    questions:[
+      {id:31,text:"¿En qué plataforma se estrenó la serie?",opts:["Netflix","Disney+","Amazon Prime","Cartoon Network","Vimeo","YouTube"],ans:5},
+      {id:32,text:"¿Quién es la creadora principal de la serie?",opts:["Vivienne Medrano","Rebecca Sugar","Natalie Lawhead","Liam Vickers","Julia Vickerman","Gooseworx"],ans:5},
+      {id:33,text:"¿Cuánto dura exactamente el episodio piloto?",opts:["22:30 minutos","28:10 minutos","25:45 minutos","24:00 minutos","27:15 minutos","26:50 minutos"],ans:2},
+      {id:34,text:"¿Qué teoría tiene el fandom sobre el origen de los personajes?",opts:["Son robots creados por Caine","Son personajes de videojuegos abandonados","Son fragmentos de la mente de Caine","Son almas atrapadas en un servidor","Son clones digitales de personas fallecidas","Son personas reales atrapadas digitalmente"],ans:5},
+      {id:35,text:"¿Cuántas visualizaciones obtuvo el piloto en su primera semana?",opts:["5 millones","20 millones","50 millones","75 millones","200 millones","100 millones"],ans:5},
+      {id:36,text:"¿Cuál es el nombre del estudio de animación?",opts:["Spindlehorse","Toon Boom Studios","Digital Circus Studio","Hazbin Productions","Cartoon Saloon","Glitch Productions"],ans:5},
+      {id:37,text:"¿Qué detalle de Pomni sugiere que lleva tiempo en el circo?",opts:["Sus zapatos están desgastados","Conoce algunas reglas sin que nadie se las diga","Habla con familiaridad con Caine","Ya no reacciona con sorpresa ante el entorno","Tiene marcas en su traje de uso prolongado","Sus ojos ya tienen la apariencia digital desde el inicio"],ans:5},
+      {id:38,text:"¿Qué simboliza la abstracción según el fandom?",opts:["La muerte dentro del juego","Una actualización forzada del personaje","El reinicio del sistema del circo","Una penalización por romper las reglas","La fusión del personaje con el sistema","La locura total al perder la identidad humana"],ans:5},
+      {id:39,text:"¿Qué canción acompaña la introducción de la serie?",opts:["Welcome to the Greatest Show on Earth","Step Right Up to the Digital Stage","Welcome to the Digital Circus","Enter the Ring of Digital Dreams","The Circus of Infinite Wonders Begins","Come Join the Show Inside the Machine"],ans:2},
+      {id:40,text:"¿Qué le ocurre a un personaje completamente abstraído?",opts:["Es eliminado del sistema permanentemente","Se convierte en un NPC del circo","Es enviado a una zona de cuarentena","Pierde sus colores y se vuelve transparente","Queda suspendido en una dimensión paralela","Se vuelve una entidad caótica sin consciencia propia"],ans:5},
+    ]
+  },
+  {
+    id:"ultra", label:"ULTRA FAN — Nivel 5", cls:"ultra", dot:"dot-ultra", open:true,
+    questions:[
+      {id:41,num:true,text:"¿Qué nombre le asignó la máquina a Pomni cuando llegó al circo? (Cap. 1)",ans:["xddcc"],hint:"Código de 5 caracteres (letras y números)"},
+      {id:42,text:"¿Cómo se llama el reino al que Caine manda a los personajes en la aventura dulce? (Cap. 2)",ans:["reino cañon caramelo","reino canon caramelo","cañon caramelo","canon caramelo"],hint:"Nombre completo del reino"},
+      {id:43,num:true,text:"¿Cuántos NPCs ve Gummigoo cuando se buguea junto a Pomni? (Cap. 2)",ans:["12"],hint:"Un número"},
+      {id:44,text:"¿Qué le pasa a la máscara de Gangle cuando aguanta la respiración? (Cap. 3)",ans:["su mascara gira","gira","da vueltas","rota","la mascara gira","mascara gira"],hint:"Describe el movimiento"},
+      {id:45,text:"¿Quién mató a la esposa del hombre de la cinta en el capítulo 3?",ans:["el","el mismo","el esposo","él"],hint:"Una o dos palabras"},
+      {id:46,text:"¿Qué decía la placa del carro en el que se montó Jax? (Cap. 4)",ans:["jax001","jax 001","jax.001"],hint:"Nombre + número"},
+      {id:47,num:true,text:"¿Qué edad tiene Pomni? (Cap. 5)",ans:["25"],hint:"Un número"},
+      {id:48,text:"¿De qué trabajaba Pomni antes de llegar al circo? (Cap. 5)",ans:["contadora","contador","contabilidad"],hint:"Profesión"},
+    ]
+  },
+  {
+    id:"definitive", label:"FAN DEFINITIVO — Nivel 6", cls:"definitive", dot:"dot-definitive", open:true,
+    questions:[
+      {id:49,text:"¿En qué trabajaba Ragatha antes del circo? (Cap. 5)",ans:["bienes raices","bienes raíces"],hint:"Sector laboral"},
+      {id:50,text:"¿Cuál es el ataque especial de Kinger en el duelo de armas con Pomni y Jax? (Cap. 6)",ans:["super ataque rebotin","rebotin","super rebotin","ataque rebotin","súper ataque rebotín","súper rebotin","super rebotín"],hint:"Nombre del ataque"},
+      {id:51,num:true,text:"¿Cuántas cápsulas enumeradas aparecen en los planos de Abel? (Cap. 7)",ans:["3"],hint:"Un número"},
+      {id:52,num:true,text:"¿Cuántos cuchillos tenía Pomni en su cuerpo cuando Caine la llevó y devolvió? (Cap. 8)",ans:["4"],hint:"Un número"},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let correct = 0, wrong = 0, done = 0;
+const answered = {};
+
+// ═══════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ═══════════════════════════════════════════
+function hideAll() {
+  document.getElementById('char-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  const lb = document.getElementById('leaderboard-screen');
+  lb.style.display = 'none'; lb.classList.remove('show');
+}
+
+function showCharScreen() {
+  hideAll();
+  buildCharGrid();
+  const btn = document.getElementById('char-confirm-btn');
+  btn.classList.remove('active');
+  btn.textContent = 'Entrar al circo';
+  selectedChar = null;
+  document.getElementById('char-screen').style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function showLeaderboard() {
+  hideAll();
+  const lb = document.getElementById('leaderboard-screen');
+  lb.style.display = 'block';
+  lb.classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  await loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  const content = document.getElementById('lb-content');
+  const notice  = document.getElementById('lb-config-notice');
+
+  if (!isConfigured()) {
+    notice.style.display = 'block';
+    content.innerHTML = '<div class="lb-empty">Configura Supabase para ver los resultados aquí.</div>';
+    return;
+  }
+  notice.style.display = 'none';
+  content.innerHTML = '<div class="lb-loading">Cargando campeones...</div>';
+
+  try {
+    const rows = await sbSelect();
+    if (!rows || rows.length === 0) {
+      content.innerHTML = '<div class="lb-empty">Nadie ha jugado aún. ¡Sé el primero!</div>';
       return;
     }
-
-    body.innerHTML = '';
-    data.forEach((row, i) => {
-      const pos = i + 1;
-      let posClass = 'normal';
-      let posText = pos;
-      if (pos === 1) { posClass = 'gold'; posText = '🥇'; }
-      else if (pos === 2) { posClass = 'silver'; posText = '🥈'; }
-      else if (pos === 3) { posClass = 'bronze'; posText = '🥉'; }
-
-      let catClass = 'falso';
-      if (row.categoria === 'Super Fan') catClass = 'superFan';
-      else if (row.categoria === 'Fan Sobresaliente') catClass = 'sobresaliente';
-      else if (row.categoria === 'Fan Promedio') catClass = 'promedio';
-
-      const isMe = row.nombre === currentHighlightName;
-      const div = document.createElement('div');
-      div.className = `ranking-row ${isMe ? 'highlight' : ''}`;
-      div.innerHTML = `
-        <div class="rank-pos ${posClass}">${posText}</div>
-        <div class="rank-name">${escapeHtml(row.nombre)}</div>
-        <div class="rank-score">${row.puntaje}</div>
-        <div class="rank-time">${formatTime(row.tiempo_seg)}</div>
-        <div class="rank-cat ${catClass}">${row.categoria}</div>
-      `;
-      body.appendChild(div);
-    });
-  } catch(e) {
-    body.innerHTML = '<div class="empty-state"><p>⚠️ Error al cargar el ranking. Intenta de nuevo.</p></div>';
+    renderLeaderboard(rows);
+  } catch (e) {
+    content.innerHTML = `<div class="lb-empty" style="color:var(--red);">Error al cargar: ${e.message}</div>`;
   }
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function renderLeaderboard(rows) {
+  const pctColor = p => p === 100 ? 'var(--gold)' : p >= 85 ? 'var(--accent3)' : p >= 60 ? 'var(--medium)' : 'var(--muted)';
+  const rankLabel = i => {
+    if (i === 0) return '<span class="lb-rank gold">1</span>';
+    if (i === 1) return '<span class="lb-rank silver">2</span>';
+    if (i === 2) return '<span class="lb-rank bronze">3</span>';
+    return `<span class="lb-rank normal">${i + 1}</span>`;
+  };
+  const rankCls = i => i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+  const fmtDate = iso => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'2-digit' });
+  };
 
-// ===== REINICIAR =====
-function restartGame() {
-  currentHighlightName = '';
-  showScreen('screen-welcome');
-}
-
-// ===== CONFETTI =====
-function launchConfetti() {
-  const colors = ['#a855f7','#ec4899','#06b6d4','#fbbf24','#10b981'];
-  for (let i = 0; i < 60; i++) {
-    const c = document.createElement('div');
-    c.className = 'confetti-piece';
-    c.style.cssText = `
-      left: ${Math.random()*100}vw;
-      background: ${colors[Math.floor(Math.random()*colors.length)]};
-      --d: ${1.5+Math.random()*2}s;
-      --delay: ${Math.random()*1.5}s;
-      transform: rotate(${Math.random()*360}deg);
+  let html = `
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Personaje</th>
+          <th>Puntos</th>
+          <th>Tiempo</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  rows.forEach((r, i) => {
+    const pct = Math.round((r.score / 52) * 100);
+    html += `
+      <tr class="${rankCls(i)}">
+        <td>${rankLabel(i)}</td>
+        <td class="lb-name">${escapeHtml(r.character_name)}</td>
+        <td>
+          <span class="lb-score">${r.score}/52</span>
+          <span class="lb-pct" style="color:${pctColor(pct)};background:${pctColor(pct)}18;margin-left:6px;">${pct}%</span>
+        </td>
+        <td class="lb-time">${formatTime(r.time_seconds)}</td>
+        <td class="lb-date">${fmtDate(r.created_at)}</td>
+      </tr>
     `;
-    document.body.appendChild(c);
-    setTimeout(() => c.remove(), 4000);
+  });
+  html += '</tbody></table>';
+  document.getElementById('lb-content').innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════
+//  START QUIZ
+// ═══════════════════════════════════════════
+function startQuiz() {
+  if (selectedChar === null) return;
+  hideAll();
+  document.getElementById('quiz-screen').style.display = 'block';
+
+  const c = characters[selectedChar];
+  document.getElementById('player-badge-display').textContent = `Jugando como: ${c.name}`;
+
+  cheated = false;
+  quizActive = true;
+  correct = 0; wrong = 0; done = 0;
+  Object.keys(answered).forEach(k => delete answered[k]);
+  updateScore();
+  buildQuiz();
+  startTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+//  BUILD QUIZ
+// ═══════════════════════════════════════════
+function buildQuiz() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  const sectionColors = { easy:'var(--easy)', medium:'var(--medium)', hard:'var(--hard)', extreme:'var(--extreme)', ultra:'var(--ultra)', definitive:'var(--definitive)' };
+  sections.forEach(sec => {
+    const sh = document.createElement('div');
+    sh.className = `section-header ${sec.cls}`;
+    sh.innerHTML = `<span class="${sec.dot}">●</span> ${sec.label}`;
+    container.appendChild(sh);
+    sec.questions.forEach(q => {
+      container.appendChild(sec.open ? buildOpenCard(q) : buildMCCard(q));
+    });
+  });
+}
+
+const LETTERS = ['A','B','C','D','E','F'];
+
+function buildMCCard(q) {
+  const card = document.createElement('div');
+  card.className = 'q-card'; card.id = `card-${q.id}`;
+  const grid = q.tf ? 'grid-template-columns:1fr 1fr' : '';
+  card.innerHTML = `
+    <div class="q-number">Pregunta ${q.id}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options-grid" id="opts-${q.id}" style="${grid}">
+      ${q.opts.map((o,i)=>`
+        <button class="opt-btn" id="opt-${q.id}-${i}" onclick="pickMC(${q.id},${i},${q.ans})">
+          <span class="opt-letter">${q.tf?(i===0?'V':'F'):LETTERS[i]}</span>${o}
+        </button>`).join('')}
+    </div>
+    <div class="feedback" id="fb-${q.id}"></div>`;
+  return card;
+}
+
+function buildOpenCard(q) {
+  const card = document.createElement('div');
+  card.className = 'q-card'; card.id = `card-${q.id}`;
+  card.innerHTML = `
+    <div class="q-number">Pregunta ${q.id} ${q.num ? '· (Número)' : '· (Respuesta abierta)'}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="open-row">
+      <input type="text" class="open-input" id="open-${q.id}" placeholder="${q.hint}" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <button class="submit-btn" id="sub-${q.id}" onclick="checkOpen(${q.id})">Verificar</button>
+    </div>
+    <div class="feedback" id="fb-${q.id}"></div>`;
+  return card;
+}
+
+// ═══════════════════════════════════════════
+//  MC LOGIC
+// ═══════════════════════════════════════════
+function pickMC(qId, picked, correct_idx) {
+  if (answered[qId]) return;
+  answered[qId] = true;
+  const opts = document.querySelectorAll(`#opts-${qId} .opt-btn`);
+  opts.forEach(b => b.disabled = true);
+  const card = document.getElementById(`card-${qId}`);
+  const fb   = document.getElementById(`fb-${qId}`);
+  if (picked === correct_idx) {
+    opts[picked].classList.add('correct');
+    card.classList.add('answered-correct');
+    fb.textContent = 'Correcto!'; fb.className = 'feedback show ok'; correct++;
+  } else {
+    opts[picked].classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    card.classList.add('answered-wrong');
+    fb.textContent = 'Incorrecto.'; fb.className = 'feedback show bad'; wrong++;
+  }
+  done++; updateScore();
+}
+
+// ═══════════════════════════════════════════
+//  OPEN LOGIC
+// ═══════════════════════════════════════════
+function normalizeAnswer(raw, isNum) {
+  let s = raw.toLowerCase().trim()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u');
+  if (isNum && !/^\d+$/.test(s)) return null;
+  return s;
+}
+function normalizeKey(k) {
+  return k.toLowerCase()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').trim();
+}
+
+function checkOpen(qId) {
+  if (answered[qId]) return;
+  let q = null;
+  for (const sec of sections) {
+    if (!sec.open) continue;
+    const found = sec.questions.find(x => x.id === qId);
+    if (found) { q = found; break; }
+  }
+  if (!q) return;
+  const input = document.getElementById(`open-${qId}`);
+  const sub   = document.getElementById(`sub-${qId}`);
+  const fb    = document.getElementById(`fb-${qId}`);
+  const card  = document.getElementById(`card-${qId}`);
+  const norm  = normalizeAnswer(input.value, q.num);
+  if (norm === null) { fb.textContent = 'Esta pregunta requiere un número.'; fb.className = 'feedback show bad'; return; }
+  if (norm === '')   { fb.textContent = 'Escribe una respuesta primero.';     fb.className = 'feedback show bad'; return; }
+  answered[qId] = true;
+  input.disabled = true; sub.disabled = true;
+  const accepted = q.ans.map(a => normalizeKey(a));
+  if (accepted.includes(norm)) {
+    input.classList.add('correct'); card.classList.add('answered-correct');
+    fb.textContent = 'Correcto!'; fb.className = 'feedback show ok'; correct++;
+  } else {
+    input.classList.add('wrong'); card.classList.add('answered-wrong');
+    fb.textContent = 'Incorrecto.'; fb.className = 'feedback show bad'; wrong++;
+  }
+  done++; updateScore();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.activeElement;
+  if (active && active.classList.contains('open-input')) {
+    const id = parseInt(active.id.replace('open-',''));
+    checkOpen(id);
+  }
+});
+
+// ═══════════════════════════════════════════
+//  SCORE
+// ═══════════════════════════════════════════
+function updateScore() {
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent   = wrong;
+  document.getElementById('sc-done').textContent    = done;
+  document.getElementById('prog-bar').style.width   = (done/52*100).toFixed(1)+'%';
+}
+
+// ═══════════════════════════════════════════
+//  RESULTS + SAVE
+// ═══════════════════════════════════════════
+async function showResults(fromCheat) {
+  stopTimer();
+  quizActive = false;
+
+  if (fromCheat) {
+    sections.forEach(sec => {
+      sec.questions.forEach(q => {
+        if (!answered[q.id]) {
+          answered[q.id] = 'cheat-wrong';
+          wrong++; done++;
+        }
+      });
+    });
+    updateScore();
+  }
+
+  hideAll();
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+  rs.classList.add('show');
+
+  const pct = Math.round(correct/52*100);
+  document.getElementById('res-score').textContent = `${correct}/52`;
+  document.getElementById('res-time').textContent  = `Tiempo: ${formatTime(timerSeconds)}`;
+
+  if (selectedChar !== null) {
+    document.getElementById('res-player-name').textContent = characters[selectedChar].name;
+  }
+  document.getElementById('res-cheat-note').style.display = fromCheat ? 'block' : 'none';
+
+  let emoji, title, sub;
+  if (pct===100)    { emoji='🏆'; title='Leyenda del Circo!';       sub='Puntuación perfecta. Eres oficialmente parte del elenco.'; }
+  else if (pct>=85) { emoji='🎪'; title='Fan Definitivo';            sub='El circo te reconoce. Caine estaría orgulloso.'; }
+  else if (pct>=70) { emoji='🎠'; title='Ultra Fan';                 sub='Conoces el circo mejor que la mayoría.'; }
+  else if (pct>=55) { emoji='🎭'; title='Espectador Veterano';       sub='Buen conocimiento, pero hay secretos que aún no descubres.'; }
+  else if (pct>=40) { emoji='🤡'; title='Asistente del Circo';       sub='Todavía te falta explorar muchas zonas del circo.'; }
+  else              { emoji='😵'; title='Abstracción inminente...';  sub='Parece que Pomni sabe más del circo que tú.'; }
+
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent   = sub;
+
+  // Breakdown
+  const breakdown = document.getElementById('res-breakdown');
+  breakdown.innerHTML = '';
+  const colors = { easy:'var(--easy)', medium:'var(--medium)', hard:'var(--hard)', extreme:'var(--extreme)', ultra:'var(--ultra)', definitive:'var(--definitive)' };
+  const labels = { easy:'Facil', medium:'Intermedio', hard:'Dificil', extreme:'Muy Dificil', ultra:'Ultra Fan', definitive:'Fan Definitivo' };
+  sections.forEach(sec => {
+    let sc = 0;
+    sec.questions.forEach(q => {
+      const card = document.getElementById(`card-${q.id}`);
+      if (card && card.classList.contains('answered-correct')) sc++;
+    });
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `<span>${labels[sec.id]}</span><span style="color:${colors[sec.id]}">${sc}/${sec.questions.length}</span>`;
+    breakdown.appendChild(row);
+  });
+
+  await saveResult(fromCheat);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function saveResult(wasCheat) {
+  const ss = document.getElementById('save-status');
+  if (!isConfigured()) { ss.style.display = 'none'; return; }
+  if (selectedChar === null) { ss.style.display = 'none'; return; }
+
+  ss.style.display = 'block';
+  ss.className = 'save-status saving';
+  ss.textContent = 'Guardando resultado...';
+
+  try {
+    await sbInsert({
+      character_name: characters[selectedChar].name,
+      score:          correct,
+      total:          52,
+      time_seconds:   timerSeconds,
+      cheated:        wasCheat
+    });
+    ss.className = 'save-status saved';
+    ss.textContent = 'Resultado guardado en la tabla de campeones.';
+  } catch (e) {
+    ss.className = 'save-status save-err';
+    ss.textContent = `No se pudo guardar: ${e.message}`;
   }
 }
 
-// ===== INIT =====
-createStars();
+// ═══════════════════════════════════════════
+//  RESET
+// ═══════════════════════════════════════════
+function resetToChar() {
+  stopTimer();
+  quizActive = false; cheated = false;
+  correct = 0; wrong = 0; done = 0;
+  Object.keys(answered).forEach(k => delete answered[k]);
+  document.getElementById('cheat-overlay').classList.remove('active');
+  showCharScreen();
+}
 
-// Highlight jugador actual al ver ranking desde resultado
-const origShowScreen = showScreen;
-window.showScreen = function(id) {
-  if (id === 'screen-ranking' && playerName) {
-    currentHighlightName = playerName;
-  }
-  origShowScreen(id);
-};
+// ═══════════════════════════════════════════
+//  ANTI-CHEAT
+// ═══════════════════════════════════════════
+function triggerCheat() {
+  if (!quizActive || cheated) return;
+  cheated = true; quizActive = false;
+  stopTimer();
+  document.getElementById('cheat-score-display').textContent = `${correct}/52`;
+  document.getElementById('cheat-score-sub').textContent =
+    `${done} respondidas · ${52 - done} sin responder (contadas como incorrectas)`;
+  document.getElementById('cheat-overlay').classList.add('active');
+  document.getElementById('quiz-screen').style.display = 'none';
+}
+
+document.addEventListener('visibilitychange', () => { if (document.hidden) triggerCheat(); });
+window.addEventListener('blur',     () => { triggerCheat(); });
+window.addEventListener('pagehide', () => { triggerCheat(); });
+window.addEventListener('beforeunload', e => { if (quizActive) { triggerCheat(); e.preventDefault(); e.returnValue = ''; } });
+document.addEventListener('keydown', e => {
+  if (!quizActive) return;
+  if (e.key === 'F12') { e.preventDefault(); triggerCheat(); return; }
+  if (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) { e.preventDefault(); triggerCheat(); return; }
+  if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); triggerCheat(); return; }
+  if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); triggerCheat(); return; }
+  if (e.altKey  && e.key === 'Tab') { e.preventDefault(); triggerCheat(); return; }
+});
+document.addEventListener('mouseleave', e => {
+  if (!quizActive) return;
+  if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) triggerCheat();
+});
+document.addEventListener('contextmenu', e => { if (quizActive) e.preventDefault(); });
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+buildCharGrid();
 </script>
 </body>
 </html>
