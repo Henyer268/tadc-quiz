@@ -79,9 +79,7 @@
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px;
     color: var(--muted);
   }
-  .lb-table th, .lb-table td {
-    padding: 12px 16px; text-align: left;
-  }
+  .lb-table th, .lb-table td { padding: 12px 16px; text-align: left; }
   .lb-table th:last-child, .lb-table td:last-child { text-align: right; }
   .lb-table th:nth-child(3), .lb-table td:nth-child(3) { text-align: center; }
   .lb-table tbody tr {
@@ -116,9 +114,7 @@
     display: inline-block;
   }
   .lb-empty { text-align: center; color: var(--muted); padding: 40px; font-size: 0.95rem; }
-  .lb-actions {
-    display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap;
-  }
+  .lb-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
   .lb-btn {
     background: linear-gradient(135deg, var(--accent3), var(--accent1));
     border: none; border-radius: 50px; padding: 13px 36px;
@@ -127,13 +123,8 @@
     transition: opacity 0.2s, transform 0.15s;
   }
   .lb-btn:hover { opacity: 0.88; transform: translateY(-2px); }
-  .lb-btn.secondary {
-    background: var(--card2); color: var(--text);
-    border: 1px solid var(--border);
-  }
+  .lb-btn.secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
   .lb-btn.secondary:hover { border-color: var(--accent1); }
-
-  /* config notice */
   .config-notice {
     background: rgba(255,75,110,0.1); border: 1px solid rgba(255,75,110,0.3);
     border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;
@@ -418,6 +409,7 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdvb3B4cWt4dW9ncWhscHBzZnl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDYyMDgsImV4cCI6MjA5MDI4MjIwOH0.qbLwPNGDYXF920wsGsGIB-91TlI5j1nU51y5cS7udwg';
   const TABLE_NAME   = 'tadc_leaderboard';
 
+  // ── INSERT normal (para resultados normales y cheat overlay) ──
   async function sbInsert(row) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
       method: 'POST',
@@ -425,12 +417,44 @@
         'Content-Type': 'application/json',
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'return=representation'
+        'Prefer': 'return=minimal'
       },
       body: JSON.stringify(row)
     });
     if (!r.ok) throw new Error(await r.text());
-    return r.json();
+    return true;
+  }
+
+  // ── INSERT seguro: intenta fetch, si falla usa sendBeacon ──
+  // Usado cuando la página puede estar cerrándose (trampa)
+  async function sbInsertSafe(row) {
+    const url  = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
+    const body = JSON.stringify(row);
+    try {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return true;
+    } catch (e) {
+      // Fallback: sendBeacon garantiza entrega incluso al cerrar la pestaña
+      const blob = new Blob([body], { type: 'application/json' });
+      return navigator.sendBeacon(`${url}?apikey=${SUPABASE_KEY}`, blob);
+    }
+  }
+
+  // ── INSERT síncrono vía sendBeacon (para beforeunload) ──
+  function sbInsertBeacon(row) {
+    const url  = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?apikey=${SUPABASE_KEY}`;
+    const blob = new Blob([JSON.stringify(row)], { type: 'application/json' });
+    return navigator.sendBeacon(url, blob);
   }
 
   async function sbSelect() {
@@ -460,7 +484,7 @@
   <div class="cheat-msg">Saliste de la encuesta. El quiz fue cerrado automáticamente y las preguntas no respondidas cuentan como incorrectas.</div>
   <div class="cheat-score" id="cheat-score-display">0/52</div>
   <div class="cheat-sub" id="cheat-score-sub"></div>
-  <div id="cheat-save-status" class="cheat-save-note"></div>
+  <div id="cheat-save-note" class="cheat-save-note"></div>
   <div class="cheat-actions" style="margin-top:24px;">
     <button class="cheat-btn" onclick="resetToChar()">Empezar de nuevo</button>
     <button class="cheat-btn-lb" onclick="goLeaderboardFromCheat()">Ver tabla</button>
@@ -538,7 +562,7 @@
 
 <script>
 // ═══════════════════════════════════════════
-//  PERSONAJES — solo nombres, sin emojis
+//  PERSONAJES
 // ═══════════════════════════════════════════
 const characters = [
   { name: "Abel" },
@@ -582,9 +606,7 @@ function startTimer() {
   }, 1000);
 }
 
-function stopTimer() {
-  clearInterval(timerInterval);
-}
+function stopTimer() { clearInterval(timerInterval); }
 
 function updateTimerDisplay() {
   const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
@@ -592,18 +614,13 @@ function updateTimerDisplay() {
   const el = document.getElementById('timer-display');
   if (!el) return;
   el.textContent = `${m}:${s}`;
-  if (timerSeconds >= 3600) {
-    el.classList.add('urgent');
-  } else {
-    el.classList.remove('urgent');
-  }
+  el.classList.toggle('urgent', timerSeconds >= 3600);
 }
 
 function formatTime(secs) {
   const m = Math.floor(secs / 60);
   const s = secs % 60;
-  if (m === 0) return `${s}s`;
-  return `${m}m ${s}s`;
+  return m === 0 ? `${s}s` : `${m}m ${s}s`;
 }
 
 // ═══════════════════════════════════════════
@@ -633,108 +650,65 @@ function selectChar(idx) {
 
 // ═══════════════════════════════════════════
 //  BANCO DE PREGUNTAS
-//  NOTA: opts[] shuffled para que la respuesta
-//  correcta NO esté siempre en la última posición.
-//  ans = índice de la respuesta correcta en opts[].
 // ═══════════════════════════════════════════
 const sections = [
   {
     id:"easy", label:"FACIL — Nivel 1", cls:"easy", dot:"dot-easy",
     questions:[
-      // ans en pos 0 (primera)
       {id:1,text:"¿Cómo se llama la protagonista principal?",opts:["Pomni","Ragatha","Gangle","Zooble","Bubble","Kaufmo"],ans:0},
-      // ans en pos 1 (segunda)
       {id:2,text:"¿Quién es el maestro de ceremonias?",opts:["Jax","Caine","Kinger","Ragatha","Bubble","Zooble"],ans:1},
-      // ans en pos 4 (quinta)
       {id:3,text:"¿Qué accesorio lleva Pomni en la cabeza?",opts:["Sombrero de mago","Corona de colores","Casco de payaso","Gorra de béisbol","Gorro de bufón","Tiara brillante"],ans:4},
-      // ans en pos 2 (tercera)
       {id:4,text:"¿De qué color es principalmente el traje de Pomni?",opts:["Rosa y blanco","Morado y negro","Azul y rojo","Verde y amarillo","Celeste y gris","Dorado y plateado"],ans:2},
-      // ans en pos 0 (primera)
       {id:5,text:"¿Jax es un…?",opts:["Conejo","Gato","Perro","Zorro","Oso","Lobo"],ans:0},
-      // V/F — ans en pos 0
       {id:6,text:"¿Ragatha es una muñeca de trapo?",opts:["Verdadero","Falso"],ans:0,tf:true},
-      // V/F — ans en pos 1
       {id:7,text:"¿El Circo Digital existe en el mundo real?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      // ans en pos 3 (cuarta)
       {id:8,text:"¿Cómo se llama el personaje que flota como burbuja?",opts:["Glitch","Orbie","Float","Bubble","Sphera","Blob"],ans:3},
-      // V/F — ans en pos 1
       {id:9,text:"¿Pomni llega al circo feliz y emocionada?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      // ans en pos 1 (segunda)
       {id:10,text:"¿De qué color son las orejas de Jax?",opts:["Rojas","Moradas","Negras","Azules","Verdes","Blancas"],ans:1},
     ]
   },
   {
     id:"medium", label:"INTERMEDIO — Nivel 2", cls:"medium", dot:"dot-medium",
     questions:[
-      // ans en pos 4 (quinta)
       {id:11,text:"¿Cómo se llama el proceso cuando un personaje pierde la cordura?",opts:["Fragmentación","Digitalización","Corrupción","Disociación","Abstracción","Colapso mental"],ans:4},
-      // ans en pos 0 (primera)
       {id:12,text:"¿Qué personaje tiene parches de corazones?",opts:["Ragatha","Gangle","Pomni","Zooble","Bubble","Kinger"],ans:0},
-      // V/F — ans en pos 1
       {id:13,text:"¿Kinger es el más estable mentalmente?",opts:["Verdadero","Falso"],ans:1,tf:true},
-      // ans en pos 2 (tercera)
       {id:14,text:"¿Qué forma tiene la cabeza de Kinger?",opts:["Cuadrada","Circular","De rey de ajedrez","Triangular","De dado","De corona"],ans:2},
-      // ans en pos 1 (segunda)
       {id:15,text:"¿De qué material es la máscara de Gangle?",opts:["Metal","Porcelana","Cristal","Madera","Plástico","Tela endurecida"],ans:1},
-      // ans en pos 3 (cuarta)
       {id:16,text:"¿Cuántos personajes principales hay al inicio?",opts:["4","5","7","6","8","9"],ans:3},
-      // V/F — ans en pos 0
       {id:17,text:"¿Zooble puede cambiar la forma de su cuerpo?",opts:["Verdadero","Falso"],ans:0,tf:true},
-      // ans en pos 0 (primera)
       {id:18,text:"¿Qué personaje se abstrae en el episodio piloto?",opts:["Kaufmo","Kinger","Gangle","Zooble","Jax","Ragatha"],ans:0},
-      // ans en pos 4 (quinta)
       {id:19,text:"¿Qué color predomina en el diseño del circo?",opts:["Oscuro y negro","Pastel y suave","Rojo y dorado","Blanco y plateado","Colores vivos y saturados","Gris y azul"],ans:4},
-      // V/F — ans en pos 0
       {id:20,text:"¿Caine puede modificar el entorno del circo?",opts:["Verdadero","Falso"],ans:0,tf:true},
     ]
   },
   {
     id:"hard", label:"DIFICIL — Nivel 3", cls:"hard", dot:"dot-hard",
     questions:[
-      // ans en pos 1 (segunda)
       {id:21,text:"¿Cómo se llama el personaje abstracto del piloto?",opts:["Koufmo","Kaufmo","Darkmo","Glitchmo","Void","Chaosmo"],ans:1},
-      // ans en pos 0 (primera)
       {id:22,text:"¿Qué emoción muestra Ragatha hacia Pomni al llegar?",opts:["Empatía y amabilidad","Entusiasmo y alegría","Ternura protectora","Cariño maternal","Curiosidad amistosa","Indiferencia fría"],ans:0},
-      // ans en pos 2 (tercera)
       {id:23,text:"¿Qué ocurre al entorno cuando hay un error del sistema?",opts:["Los personajes pierden sus colores progresivamente","Aparecen sombras y el escenario se oscurece","Se vuelve glitchy e incompleto","El tiempo dentro del circo se detiene por completo","Los personajes quedan suspendidos en el aire","Las paredes del circo empiezan a desaparecer"],ans:2},
-      // ans en pos 3 (cuarta)
       {id:24,text:"¿Por qué Kinger se comporta de forma errática?",opts:["Es su personalidad de origen","Tuvo una mala experiencia en una aventura","Fue afectado por una abstracción parcial","Lleva más tiempo que nadie atrapado en el circo","Tiene un defecto en su código digital","Perdió a su mejor amigo en el circo"],ans:3},
-      // ans en pos 0 (primera)
       {id:25,text:"¿Qué dos emociones representan las máscaras de Gangle?",opts:["Tristeza y felicidad","Ira y calma","Miedo y valentía","Amor y odio","Sorpresa y aburrimiento","Vergüenza y orgullo"],ans:0},
-      // ans en pos 4 (quinta)
       {id:26,text:"¿Qué actitud tiene Jax ante el peligro real?",opts:["Se vuelve el líder del grupo","Entra en pánico silencioso","Huye sin avisar a nadie","Busca proteger a Pomni","Sigue siendo burlón e indiferente","Pide ayuda a Caine inmediatamente"],ans:4},
-      // V/F — ans en pos 0
       {id:27,text:"¿Hay zonas sin terminar fuera del escenario principal?",opts:["Verdadero","Falso"],ans:0,tf:true},
-      // ans en pos 2 (tercera)
       {id:28,text:"¿Qué intenta Pomni antes de unirse a la aventura?",opts:["Conocer a todos los personajes","Hablar con Caine sobre las reglas","Encontrar una salida del circo","Explorar el escenario principal","Entender el funcionamiento del circo","Hacer amistad con Ragatha"],ans:2},
-      // ans en pos 1 (segunda)
       {id:29,text:"¿Cómo reacciona Caine cuando Pomni pregunta cómo salir?",opts:["Le explica que es imposible salir","Evita la pregunta y la redirige a la aventura","Se molesta y la ignora","Le promete buscar una solución","Le dice que pregunte a Ragatha","Se pone triste y cambia el tema"],ans:1},
-      // ans en pos 3 (cuarta)
       {id:30,text:"¿Qué hace único a Zooble frente a los demás?",opts:["Es el único que recuerda su vida pasada","Puede salir brevemente del circo","No participa en ninguna aventura","Su cuerpo está hecho de partes intercambiables","Tiene acceso a zonas prohibidas","Habla directamente con el sistema del circo"],ans:3},
     ]
   },
   {
     id:"extreme", label:"MUY DIFICIL — Nivel 4", cls:"extreme", dot:"dot-extreme",
     questions:[
-      // ans en pos 2 (tercera)
       {id:31,text:"¿En qué plataforma se estrenó la serie?",opts:["Netflix","Disney+","YouTube","Amazon Prime","Cartoon Network","Vimeo"],ans:2},
-      // ans en pos 0 (primera)
       {id:32,text:"¿Quién es la creadora principal de la serie?",opts:["Gooseworx","Vivienne Medrano","Rebecca Sugar","Natalie Lawhead","Liam Vickers","Julia Vickerman"],ans:0},
-      // ans en pos 1 (segunda)
       {id:33,text:"¿Cuánto dura exactamente el episodio piloto?",opts:["22:30 minutos","25:45 minutos","28:10 minutos","24:00 minutos","27:15 minutos","26:50 minutos"],ans:1},
-      // ans en pos 3 (cuarta)
       {id:34,text:"¿Qué teoría tiene el fandom sobre el origen de los personajes?",opts:["Son robots creados por Caine","Son personajes de videojuegos abandonados","Son fragmentos de la mente de Caine","Son personas reales atrapadas digitalmente","Son almas atrapadas en un servidor","Son clones digitales de personas fallecidas"],ans:3},
-      // ans en pos 4 (quinta)
       {id:35,text:"¿Cuántas visualizaciones obtuvo el piloto en su primera semana?",opts:["5 millones","20 millones","50 millones","75 millones","100 millones","200 millones"],ans:4},
-      // ans en pos 0 (primera)
       {id:36,text:"¿Cuál es el nombre del estudio de animación?",opts:["Glitch Productions","Spindlehorse","Toon Boom Studios","Digital Circus Studio","Hazbin Productions","Cartoon Saloon"],ans:0},
-      // ans en pos 2 (tercera)
       {id:37,text:"¿Qué detalle de Pomni sugiere que lleva tiempo en el circo?",opts:["Sus zapatos están desgastados","Conoce algunas reglas sin que nadie se las diga","Sus ojos ya tienen la apariencia digital desde el inicio","Habla con familiaridad con Caine","Ya no reacciona con sorpresa ante el entorno","Tiene marcas en su traje de uso prolongado"],ans:2},
-      // ans en pos 1 (segunda)
       {id:38,text:"¿Qué simboliza la abstracción según el fandom?",opts:["La muerte dentro del juego","La locura total al perder la identidad humana","Una actualización forzada del personaje","El reinicio del sistema del circo","La fusión del personaje con el sistema","Una penalización por romper las reglas"],ans:1},
-      // ans en pos 0 (primera)
       {id:39,text:"¿Qué canción acompaña la introducción de la serie?",opts:["Welcome to the Digital Circus","Welcome to the Greatest Show on Earth","Step Right Up to the Digital Stage","Enter the Ring of Digital Dreams","The Circus of Infinite Wonders Begins","Come Join the Show Inside the Machine"],ans:0},
-      // ans en pos 3 (cuarta)
       {id:40,text:"¿Qué le ocurre a un personaje completamente abstraído?",opts:["Es eliminado del sistema permanentemente","Se convierte en un NPC del circo","Es enviado a una zona de cuarentena","Se vuelve una entidad caótica sin consciencia propia","Pierde sus colores y se vuelve transparente","Queda suspendido en una dimensión paralela"],ans:3},
     ]
   },
@@ -802,7 +776,6 @@ async function showLeaderboard() {
 async function loadLeaderboard() {
   const content = document.getElementById('lb-content');
   const notice  = document.getElementById('lb-config-notice');
-
   if (!isConfigured()) {
     notice.style.display = 'block';
     content.innerHTML = '<div class="lb-empty">Configura Supabase para ver los resultados aquí.</div>';
@@ -810,7 +783,6 @@ async function loadLeaderboard() {
   }
   notice.style.display = 'none';
   content.innerHTML = '<div class="lb-loading">Cargando campeones...</div>';
-
   try {
     const rows = await sbSelect();
     if (!rows || rows.length === 0) {
@@ -842,20 +814,10 @@ function renderLeaderboard(rows) {
     const d = new Date(iso);
     return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'2-digit' });
   };
-
   let html = `
     <table class="lb-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Personaje</th>
-          <th>Puntos</th>
-          <th>Tiempo</th>
-          <th>Fecha</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+      <thead><tr><th>#</th><th>Personaje</th><th>Puntos</th><th>Tiempo</th><th>Fecha</th></tr></thead>
+      <tbody>`;
   rows.forEach((r, i) => {
     const pct = Math.round((r.score / 52) * 100);
     const isCheater = r.cheated === true;
@@ -871,8 +833,7 @@ function renderLeaderboard(rows) {
         </td>
         <td class="lb-time">${formatTime(r.time_seconds)}</td>
         <td class="lb-date">${fmtDate(r.created_at)}</td>
-      </tr>
-    `;
+      </tr>`;
   });
   html += '</tbody></table>';
   document.getElementById('lb-content').innerHTML = html;
@@ -889,13 +850,9 @@ function startQuiz() {
   if (selectedChar === null) return;
   hideAll();
   document.getElementById('quiz-screen').style.display = 'block';
-
   const c = characters[selectedChar];
   document.getElementById('player-badge-display').textContent = `Jugando como: ${c.name}`;
-
-  cheated = false;
-  cheatSaved = false;
-  quizActive = true;
+  cheated = false; cheatSaved = false; quizActive = true;
   correct = 0; wrong = 0; done = 0;
   Object.keys(answered).forEach(k => delete answered[k]);
   updateScore();
@@ -1060,13 +1017,11 @@ async function showResults(fromCheat) {
 
   hideAll();
   const rs = document.getElementById('results-screen');
-  rs.style.display = 'block';
-  rs.classList.add('show');
+  rs.style.display = 'block'; rs.classList.add('show');
 
   const pct = Math.round(correct/52*100);
   document.getElementById('res-score').textContent = `${correct}/52`;
   document.getElementById('res-time').textContent  = `Tiempo: ${formatTime(timerSeconds)}`;
-
   if (selectedChar !== null) {
     document.getElementById('res-player-name').textContent = characters[selectedChar].name;
   }
@@ -1084,7 +1039,6 @@ async function showResults(fromCheat) {
   document.getElementById('res-title').textContent = title;
   document.getElementById('res-sub').textContent   = sub;
 
-  // Breakdown
   const breakdown = document.getElementById('res-breakdown');
   breakdown.innerHTML = '';
   const colors = { easy:'var(--easy)', medium:'var(--medium)', hard:'var(--hard)', extreme:'var(--extreme)', ultra:'var(--ultra)', definitive:'var(--definitive)' };
@@ -1109,11 +1063,9 @@ async function saveResult(wasCheat) {
   const ss = document.getElementById('save-status');
   if (!isConfigured()) { ss.style.display = 'none'; return; }
   if (selectedChar === null) { ss.style.display = 'none'; return; }
-
   ss.style.display = 'block';
   ss.className = 'save-status saving';
   ss.textContent = 'Guardando resultado...';
-
   try {
     await sbInsert({
       character_name: characters[selectedChar].name,
@@ -1125,7 +1077,7 @@ async function saveResult(wasCheat) {
     ss.className = 'save-status saved';
     ss.textContent = wasCheat
       ? '⚠️ Resultado guardado como TRAMPA en la tabla de campeones.'
-      : 'Resultado guardado en la tabla de campeones.';
+      : '✅ Resultado guardado en la tabla de campeones.';
   } catch (e) {
     ss.className = 'save-status save-err';
     ss.textContent = `No se pudo guardar: ${e.message}`;
@@ -1150,14 +1102,17 @@ function goLeaderboardFromCheat() {
 }
 
 // ═══════════════════════════════════════════
-//  ANTI-CHEAT — guarda resultado al detectar trampa
+//  ANTI-CHEAT
+//  FIX: usa sbInsertSafe (con fallback a sendBeacon)
+//  FIX: eliminado listener de 'blur' (demasiados falsos positivos)
+//  FIX: beforeunload usa sendBeacon síncrono garantizado
 // ═══════════════════════════════════════════
 async function triggerCheat() {
   if (!quizActive || cheated) return;
   cheated = true; quizActive = false;
   stopTimer();
 
-  // Marcar preguntas sin responder como incorrectas
+  // Marcar no respondidas como incorrectas
   sections.forEach(sec => {
     sec.questions.forEach(q => {
       if (!answered[q.id]) {
@@ -1170,34 +1125,59 @@ async function triggerCheat() {
 
   document.getElementById('cheat-score-display').textContent = `${correct}/52`;
   document.getElementById('cheat-score-sub').textContent =
-    `${done} respondidas · ${52 - done > 0 ? 0 : ''} · ${wrong} incorrectas en total`;
+    `${wrong} incorrectas en total · ${formatTime(timerSeconds)}`;
   document.getElementById('cheat-overlay').classList.add('active');
   document.getElementById('quiz-screen').style.display = 'none';
 
-  // Guardar en BD como trampa
+  // ✅ FIX: sbInsertSafe garantiza entrega incluso si el tab se está cerrando
   if (!cheatSaved && isConfigured() && selectedChar !== null) {
     cheatSaved = true;
     const saveNote = document.getElementById('cheat-save-note');
     saveNote.textContent = 'Guardando resultado...';
     try {
-      await sbInsert({
+      const ok = await sbInsertSafe({
         character_name: characters[selectedChar].name,
         score:          correct,
         total:          52,
         time_seconds:   timerSeconds,
         cheated:        true
       });
-      saveNote.textContent = '⚠️ Resultado registrado en la tabla como TRAMPA.';
+      saveNote.textContent = ok
+        ? '⚠️ Resultado registrado en la tabla como TRAMPA.'
+        : '⚠️ Enviado (confirmación pendiente).';
     } catch (e) {
-      saveNote.textContent = `No se pudo guardar: ${e.message}`;
+      saveNote.textContent = `Error al guardar: ${e.message}`;
     }
   }
 }
 
-document.addEventListener('visibilitychange', () => { if (document.hidden) triggerCheat(); });
-window.addEventListener('blur',     () => { triggerCheat(); });
+// ✅ FIX: visibilitychange — el más confiable para cambio de tab
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) triggerCheat();
+});
+
+// ✅ FIX: pagehide — se activa al cerrar tab/navegar
 window.addEventListener('pagehide', () => { triggerCheat(); });
-window.addEventListener('beforeunload', e => { if (quizActive) { triggerCheat(); e.preventDefault(); e.returnValue = ''; } });
+
+// ✅ FIX: beforeunload usa sendBeacon SÍNCRONO (no async/await)
+// Es el único método garantizado al cerrar la pestaña
+window.addEventListener('beforeunload', e => {
+  if (!quizActive || cheated) return;
+  e.preventDefault();
+  e.returnValue = '';
+  if (isConfigured() && selectedChar !== null) {
+    cheated = true;
+    sbInsertBeacon({
+      character_name: characters[selectedChar].name,
+      score:          correct,
+      total:          52,
+      time_seconds:   timerSeconds,
+      cheated:        true
+    });
+  }
+});
+
+// Bloquear atajos de DevTools
 document.addEventListener('keydown', e => {
   if (!quizActive) return;
   if (e.key === 'F12') { e.preventDefault(); triggerCheat(); return; }
@@ -1206,10 +1186,13 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); triggerCheat(); return; }
   if (e.altKey  && e.key === 'Tab') { e.preventDefault(); triggerCheat(); return; }
 });
+
+// Mouse saliendo de la ventana
 document.addEventListener('mouseleave', e => {
   if (!quizActive) return;
   if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) triggerCheat();
 });
+
 document.addEventListener('contextmenu', e => { if (quizActive) e.preventDefault(); });
 
 // ═══════════════════════════════════════════
